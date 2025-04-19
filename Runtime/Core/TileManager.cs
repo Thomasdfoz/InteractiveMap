@@ -9,10 +9,9 @@ using System.Collections.Generic;
 [DisallowMultipleComponent]
 public class TileManager : MonoBehaviour
 {
-    [Header("Tile Settings")]
-    [SerializeField, Tooltip("Prefab do tile a ser instanciado")] private GameObject m_tilePrefab;
-    [SerializeField, Tooltip("Tamanho em pixels de cada tile")] private int m_tileSize;
-
+    private GameObject m_tilePrefab;
+    private int m_tileSize;
+    private Sprite m_defaultSprite;
     private ITileService m_tileService;
     private ObjectPool<GameObject> m_tilePool;
     private readonly Dictionary<string, GameObject> m_activeTiles = new Dictionary<string, GameObject>();
@@ -40,7 +39,7 @@ public class TileManager : MonoBehaviour
     /// <summary>
     /// Inicializa o TileManager com prefab, tamanho e serviço de tiles.
     /// </summary>
-    public void Initialize(GameObject tilePrefab, int tileSize, ITileService tileService)
+    public void Initialize(GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, ITileService tileService)
     {
         m_tilePrefab = tilePrefab;
         m_tileSize = tileSize;
@@ -88,7 +87,13 @@ public class TileManager : MonoBehaviour
 
     private void ApplyTexture(string key, GameObject go, int x, int y, int zoom, Texture2D tex)
     {
-        if (tex == null || !m_activeTiles.TryGetValue(key, out GameObject active)) return;
+        if (!m_activeTiles.TryGetValue(key, out GameObject active)) return; 
+
+        /*if (tex == null)
+        {
+            active.GetComponent<Tile>()?.SetTile(m_defaultSprite);
+            return;
+        }*/
         Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
         active.GetComponent<Tile>()?.SetTile(sprite);
     }

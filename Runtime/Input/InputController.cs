@@ -1,69 +1,62 @@
 using UnityEngine;
 
+/// <summary>
+/// Controla zoom e pan do mapa via input do mouse.
+/// </summary>
+[DisallowMultipleComponent]
 public class InputController : MonoBehaviour
 {
-    public int zoomMin;
-    public int zoomMax;
-    public float degreesAtMin = 0.001f;  // valor para m_zoom mínimo
-    public float degreesAtMax = 0.0005f;
-    public TileManager m_tileManager;
+    [Header("Zoom Limits")]
+    [SerializeField, Tooltip("Zoom mínimo permitido")] private int zoomMin = 0;
+    [SerializeField, Tooltip("Zoom máximo permitido")] private int zoomMax = 18;
 
+    [Header("Pan Sensitivity")]
+    [SerializeField, Tooltip("Grau por pixel no zoom mínimo")] private float degreesAtMin = 0.001f;
+    [SerializeField, Tooltip("Grau por pixel no zoom máximo")] private float degreesAtMax = 0.0005f;
+
+    private MapManager m_mapManager;
     private Vector3 lastMousePosition;
 
-    void Update()
+    /// <summary>
+    /// Inicializa o InputController com o MapManager alvo.
+    /// </summary>
+    public void Initialize(MapManager mapManager)
     {
-         float scroll = Input.GetAxis("Mouse ScrollWheel");
+        m_mapManager = mapManager;
+    }
 
-         if (scroll != 0)
-         {
-             // Calcula o novo m_zoom sem atualizar ainda
-             int newZoom = Mathf.Clamp(m_tileManager.Zoom + (scroll > 0 ? 1 : -1), zoomMin, zoomMax);
+    private void Update()
+    {
+        HandleZoom();
+        HandlePan();
+    }
 
-             // Só atualiza se o m_zoom realmente mudou
-             if (newZoom != m_tileManager.Zoom)
-             {
-                 m_tileManager.Zoom = newZoom;
+    private void HandleZoom()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (Mathf.Approximately(scroll, 0f)) return;
 
-                 Debug.Log(newZoom);
+        int newZoom = Mathf.Clamp(m_mapManager.Zoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
+        if (newZoom == m_mapManager.Zoom) return;
 
-                 // Carrega os novos tiles com o novo m_zoom
-                 //m_tileManager.LoadTiles();
-             }
-         }
+        m_mapManager.Zoom = newZoom;
+        m_mapManager.RenderMap();
+    }
 
-         // Captura o início do drag
-         if (Input.GetMouseButtonDown(0))
-         {
-             lastMousePosition = Input.mousePosition;
-         }
+    private void HandlePan()
+    {
+        if (Input.GetMouseButtonDown(0))
+            lastMousePosition = Input.mousePosition;
 
-         // Fim do drag
-         if (Input.GetMouseButtonUp(0))
-         {
-             // Calcula a variação do drag em tela (pixels) convertida para unidades do mundo
-             Vector3 currentMousePos = Input.mousePosition;
-             Vector3 deltaScreen = currentMousePos - lastMousePosition;
+        if (Input.GetMouseButtonUp(0))
+        {
+            Vector3 delta = Input.mousePosition - lastMousePosition;
+            float t = Mathf.InverseLerp(zoomMin, zoomMax, m_mapManager.Zoom);
+            float degreesPerPixel = Mathf.Lerp(degreesAtMin, degreesAtMax, t);
 
-             /*  
-                 Converta o deltaScreen para variação em coordenadas geográficas.
-                 A lógica aqui depende da escala do seu mapa. Nesse exemplo, 
-                 cada unidade do mundo movimentada corresponde a "degreesPerUnit" graus.
-             */
-
-             float t = Mathf.InverseLerp(zoomMin, zoomMax, m_tileManager.Zoom);
-             float dynamicDegreesPerUnit = Mathf.Lerp(degreesAtMin, degreesAtMax, t);
-
-             float deltaLon = -deltaScreen.x * dynamicDegreesPerUnit;
-             float deltaLat = -deltaScreen.y * dynamicDegreesPerUnit;
-
-             // Atualiza o centro do mapa
-             m_tileManager.CenterLon += deltaLon;
-             m_tileManager.CenterLat += deltaLat;
-
-             // Limpa os tiles antigos e recarrega com o novo centro
-           //  m_tileManager.LoadTiles();
-         }
+            m_mapManager.CenterLon -= delta.x * degreesPerPixel;
+            m_mapManager.CenterLat += delta.y * degreesPerPixel;
+            m_mapManager.RenderMap();
+        }
     }
 }
-
-

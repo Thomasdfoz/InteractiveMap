@@ -12,6 +12,7 @@ public class MapManager : MonoBehaviour
     [SerializeField, Tooltip("Prefab do tile")] private GameObject m_tilePrefab;
     [SerializeField, Tooltip("Componente de download de tiles")] private TileDownloader m_downloader;
     [SerializeField, Tooltip("Componente de InputController para zoom/pan")] private InputController m_inputController;
+    [SerializeField, Tooltip("Sprite padrão para preencher os tiles que não possuem textura do servidor")] private Sprite m_defaultSprite;
 
     [Header("Map Settings")]
     [SerializeField, Tooltip("Zoom inicial do mapa")] private int m_zoom = 2;
@@ -52,14 +53,14 @@ public class MapManager : MonoBehaviour
         // 3) Configura tile service e manager
         ITileService service = new TileDownloaderService(m_downloader);
         m_tileManager = container.AddComponent<TileManager>();
-        m_tileManager.Initialize(m_tilePrefab, m_tileSize, service);
+        m_tileManager.Initialize(m_tilePrefab, m_tileSize, m_defaultSprite, service);
         m_tileManager.Zoom = m_zoom;
         m_tileManager.CenterLat = m_centerLat;
         m_tileManager.CenterLon = m_centerLon;
         m_tileManager.Range = m_range;
 
         // 4) Inicializa InputController
-      //  m_inputController.Initialize(this);
+        m_inputController.Initialize(this);
     }
 
     private void Start() => RenderMap();
