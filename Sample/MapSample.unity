@@ -347,7 +347,7 @@ MonoBehaviour:
   zoomMax: 16
   degreesAtMin: 0.001
   degreesAtMax: 0.0005
-  m_tileManager: {fileID: 1488723604}
+  m_tileManager: {fileID: 0}
 --- !u!1 &1488723599
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,7 +358,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1488723600}
   - component: {fileID: 1488723603}
-  - component: {fileID: 1488723604}
   - component: {fileID: 1488723602}
   m_Layer: 0
   m_Name: MapManager
@@ -406,36 +405,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eca0cbcda590b54d9bd887f4c83d809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_canvas: {fileID: 564601655}
   m_tilePrefab: {fileID: 1441361277640032913, guid: 77a271ddf8817184896015dd5c762ae9, type: 3}
-  m_canvas: {fileID: 564601652}
   m_downloader: {fileID: 1488723602}
-  m_tileSize: 100
-  m_defaultSprite: {fileID: 21300000, guid: 81eb8a6838314cd46803cce2bced638b, type: 3}
-  m_zoom: 10
-  m_tileRange: 5
+  m_inputController: {fileID: 0}
+  m_zoom: 14
+  m_range: 5
   m_centerLat: -3.3074
   m_centerLon: -59.814
---- !u!114 &1488723604
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1488723599}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5986a3c61c090924f883e51bd7d6cf57, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_tilePrefab: {fileID: 1441361277640032913, guid: 77a271ddf8817184896015dd5c762ae9, type: 3}
-  m_canvas: {fileID: 564601652}
-  m_downloader: {fileID: 1488723602}
   m_tileSize: 100
-  m_defaultSprite: {fileID: 21300000, guid: 81eb8a6838314cd46803cce2bced638b, type: 3}
-  m_zoom: 10
-  m_tileRange: 5
-  m_centerLat: -3.3074
-  m_centerLon: -59.814
 --- !u!1 &1916635303
 GameObject:
   m_ObjectHideFlags: 0
