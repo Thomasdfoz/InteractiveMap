@@ -81,6 +81,7 @@ public class MapManager : MonoBehaviour
     {
         GameObject bgGO = new GameObject("Background");
         Image img = bgGO.AddComponent<Image>();
+        img.sprite = m_defaultSprite;
         img.transform.SetParent(m_canvas.transform, false);
         RectTransform rt = img.GetComponent<RectTransform>();
         rt.anchorMin = Vector2.zero;

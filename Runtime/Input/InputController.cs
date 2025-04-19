@@ -55,7 +55,7 @@ public class InputController : MonoBehaviour
             float degreesPerPixel = Mathf.Lerp(degreesAtMin, degreesAtMax, t);
 
             m_mapManager.CenterLon -= delta.x * degreesPerPixel;
-            m_mapManager.CenterLat += delta.y * degreesPerPixel;
+            m_mapManager.CenterLat -= delta.y * degreesPerPixel;
             m_mapManager.RenderMap();
         }
     }

@@ -48,7 +48,7 @@ public class TileManager : MonoBehaviour
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
             actionOnGet: tile => tile.SetActive(true),
-            actionOnRelease: tile => tile.SetActive(false),
+            actionOnRelease: tile => tile.GetComponent<Tile>()?.SetTile(m_defaultSprite),
             actionOnDestroy: Destroy,
             collectionCheck: false,
             defaultCapacity: 100,
@@ -87,13 +87,8 @@ public class TileManager : MonoBehaviour
 
     private void ApplyTexture(string key, GameObject go, int x, int y, int zoom, Texture2D tex)
     {
-        if (!m_activeTiles.TryGetValue(key, out GameObject active)) return; 
+        if (tex == null || !m_activeTiles.TryGetValue(key, out GameObject active)) return;
 
-        /*if (tex == null)
-        {
-            active.GetComponent<Tile>()?.SetTile(m_defaultSprite);
-            return;
-        }*/
         Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
         active.GetComponent<Tile>()?.SetTile(sprite);
     }
