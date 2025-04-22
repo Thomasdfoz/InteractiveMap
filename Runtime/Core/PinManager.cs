@@ -44,7 +44,7 @@ public class PinManager : MonoBehaviour
         // Pega as propriedades do mapa (ajuste conforme sua estrutura)
         double centerLat = m_mapManager.CenterLat;
         double centerLon = m_mapManager.CenterLon;
-        int zoom = m_mapManager.Zoom;
+        float zoom = m_mapManager.Zoom;
         int tilePixelSize = m_mapManager.TilePixelSize; // ex: 256
 
         // Calcula o centro em pixels globais

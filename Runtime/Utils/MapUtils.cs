@@ -25,7 +25,7 @@ public static class MapUtils
         return x >= 0 && x < max && y >= 0 && y < max;
     }
 
-    public static Vector2 LatLonToPixels(double lat, double lon, int zoom, int tileSize)
+    public static Vector2 LatLonToPixels(double lat, double lon, float zoom, int tileSize)
     {
         // Convert latitude/longitude to Mercator meters
         double x = (lon + 180.0) / 360.0;

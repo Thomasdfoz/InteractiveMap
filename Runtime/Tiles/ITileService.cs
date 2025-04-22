@@ -9,6 +9,6 @@ public interface ITileService
     /// <summary>
     /// Inicia o download do tile e invoca o callback com a textura.
     /// </summary>
-    IEnumerator DownloadTile(int x, int y, int zoom, System.Action<Texture2D> onComplete);
+    IEnumerator DownloadTile(int x, int y, float zoom, System.Action<Texture2D> onComplete);
 }
 

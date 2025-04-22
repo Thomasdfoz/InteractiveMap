@@ -20,7 +20,7 @@ public class TileManager : MonoBehaviour
     /// <summary>
     /// Zoom atual do mapa.
     /// </summary>
-    public int Zoom { get; set; }
+    public float Zoom { get; set; }
 
     /// <summary>
     /// Latitude central usada para renderização.
@@ -79,7 +79,7 @@ public class TileManager : MonoBehaviour
             {
                 int x = centerTileX + dx;
                 int y = centerTileY + dy;
-                if (!MapUtils.IsValidTile(x, y, Zoom)) continue;
+                if (!MapUtils.IsValidTile(x, y, (int)Zoom)) continue;
 
                 string key = $"{Zoom}/{x}/{y}";
                 if (m_activeTiles.ContainsKey(key)) continue;
@@ -109,7 +109,7 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private void ApplyTexture(string key, GameObject go, int x, int y, int zoom, Texture2D tex)
+    private void ApplyTexture(string key, GameObject go, int x, int y, float zoom, Texture2D tex)
     {
         if (tex == null || !m_activeTiles.TryGetValue(key, out GameObject active)) return;
 

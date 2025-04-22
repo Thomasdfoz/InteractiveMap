@@ -13,7 +13,7 @@ public class TileDownloaderService : ITileService
         m_downloader = downloader;
     }
 
-    public IEnumerator DownloadTile(int x, int y, int zoom, System.Action<Texture2D> onComplete)
+    public IEnumerator DownloadTile(int x, int y, float zoom, System.Action<Texture2D> onComplete)
     {
         yield return m_downloader.DownloadTile(x, y, zoom, onComplete);
     }

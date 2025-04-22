@@ -39,7 +39,7 @@ public class InputController : MonoBehaviour
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Approximately(scroll, 0f)) return;
 
-        int newZoom = Mathf.Clamp(m_mapManager.Zoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
+        float newZoom = Mathf.Clamp(m_mapManager.Zoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
         if (newZoom == m_mapManager.Zoom) return;
 
         m_mapManager.Zoom = newZoom;

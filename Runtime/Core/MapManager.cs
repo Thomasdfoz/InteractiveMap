@@ -15,7 +15,7 @@ public class MapManager : MonoBehaviour
     [SerializeField, Tooltip("Sprite padrão para preencher os tiles que não possuem textura do servidor")] private Sprite m_defaultSprite;
 
     [Header("Map Settings")]
-    [SerializeField, Tooltip("Zoom inicial do mapa")] private int m_zoom;
+    [SerializeField, Tooltip("Zoom inicial do mapa")] private float m_zoom;
     [SerializeField, Tooltip("Raio de tiles renderizados")] private int m_range;
     [SerializeField, Tooltip("Latitude central inicial")] private double m_centerLat;
     [SerializeField, Tooltip("Longitude central inicial")] private double m_centerLon;
@@ -28,7 +28,7 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Zoom atual do mapa.
     /// </summary>
-    public int Zoom { get => m_zoom; set => m_zoom = value; }
+    public float Zoom { get => m_zoom; set => m_zoom = value; }
 
     /// <summary>
     /// Latitude central do mapa.
