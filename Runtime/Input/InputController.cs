@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,7 @@ public class InputController : MonoBehaviour
 
     private MapManager m_mapManager;
     private Vector3 lastMousePosition;
+    public GameObject PinPrefab;
 
     /// <summary>
     /// Inicializa o InputController com o MapManager alvo.
@@ -29,6 +31,7 @@ public class InputController : MonoBehaviour
     {
         HandleZoom();
         HandlePan();
+        HandlePin();
     }
 
     private void HandleZoom()
@@ -42,21 +45,49 @@ public class InputController : MonoBehaviour
         m_mapManager.Zoom = newZoom;
         m_mapManager.RenderMap();
     }
-
+    private Vector2 panOffset;
     private void HandlePan()
     {
         if (Input.GetMouseButtonDown(0))
+        {
             lastMousePosition = Input.mousePosition;
+            panOffset = Vector2.zero;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            Vector3 delta = Input.mousePosition - lastMousePosition;
+            panOffset += new Vector2(delta.x, delta.y);
+            // Move o MapContent em tempo real
+            m_mapManager.MapContent.GetComponent<RectTransform>().anchoredPosition = panOffset;
+            lastMousePosition = Input.mousePosition;
+        }
 
         if (Input.GetMouseButtonUp(0))
         {
-            Vector3 delta = Input.mousePosition - lastMousePosition;
-            float t = Mathf.InverseLerp(zoomMin, zoomMax, m_mapManager.Zoom);
-            float degreesPerPixel = Mathf.Lerp(degreesAtMin, degreesAtMax, t);
+            // Calcula o deslocamento em pixels globais
+            double mapWidthInPixels = m_mapManager.TilePixelSize * Math.Pow(2, m_mapManager.Zoom);
+            double degreesPerPixelLon = 360.0 / mapWidthInPixels;
+            // Ajusta a escala da latitude com base na projeção Mercator
+            double latRad = m_mapManager.CenterLat * Math.PI / 180.0;
+            double degreesPerPixelLat = degreesPerPixelLon / Math.Cos(latRad);
 
-            m_mapManager.CenterLon -= delta.x * degreesPerPixel;
-            m_mapManager.CenterLat -= delta.y * degreesPerPixel;
+            // Ajusta o centro com base no offset acumulado
+            m_mapManager.CenterLon -= panOffset.x * degreesPerPixelLon;
+            m_mapManager.CenterLat -= panOffset.y * degreesPerPixelLat;
+
+            // Reseta o offset e re-renderiza
+            panOffset = Vector2.zero;
+            m_mapManager.MapContent.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             m_mapManager.RenderMap();
+        }
+    }
+
+    private void HandlePin()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            m_mapManager.AddPin(PinPrefab, -3.3074, -59.800);
         }
     }
 }

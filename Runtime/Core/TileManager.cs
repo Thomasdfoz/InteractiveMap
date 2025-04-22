@@ -2,6 +2,7 @@
 using UnityEngine.Pool;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 /// <summary>
 /// Gerencia a criação, posicionamento e reciclagem de tiles dentro de um container.
@@ -11,8 +12,8 @@ public class TileManager : MonoBehaviour
 {
     private GameObject m_tilePrefab;
     private int m_tileSize;
-    private Sprite m_defaultSprite;
     private ITileService m_tileService;
+    private MapManager m_mapManager;
     private ObjectPool<GameObject> m_tilePool;
     private readonly Dictionary<string, GameObject> m_activeTiles = new Dictionary<string, GameObject>();
 
@@ -39,11 +40,12 @@ public class TileManager : MonoBehaviour
     /// <summary>
     /// Inicializa o TileManager com prefab, tamanho e serviço de tiles.
     /// </summary>
-    public void Initialize(GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, ITileService tileService)
+    public void Initialize(MapManager mapManager, GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, ITileService tileService)
     {
         m_tilePrefab = tilePrefab;
         m_tileSize = tileSize;
         m_tileService = tileService;
+        m_mapManager = mapManager;
 
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
@@ -62,13 +64,21 @@ public class TileManager : MonoBehaviour
     public void Render()
     {
         ReleaseAll();
-        Vector2Int center = MapUtils.LatLonToTile(CenterLat, CenterLon, Zoom);
+
+        // Calcula o centro em pixels globais
+        Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, Zoom, m_mapManager.TilePixelSize);
+
+
+        // Calcula as coordenadas do tile central a partir do centro em pixels
+        int centerTileX = (int)Math.Floor(centerPx.x / m_mapManager.TilePixelSize);
+        int centerTileY = (int)Math.Floor(centerPx.y / m_mapManager.TilePixelSize);
 
         for (int dx = -Range; dx <= Range; dx++)
+        {
             for (int dy = -Range; dy <= Range; dy++)
             {
-                int x = center.x + dx;
-                int y = center.y + dy;
+                int x = centerTileX + dx;
+                int y = centerTileY + dy;
                 if (!MapUtils.IsValidTile(x, y, Zoom)) continue;
 
                 string key = $"{Zoom}/{x}/{y}";
@@ -76,13 +86,27 @@ public class TileManager : MonoBehaviour
 
                 GameObject go = m_tilePool.Get();
                 go.transform.SetParent(transform, false);
-                go.transform.localPosition = new Vector3(dx * m_tileSize, -dy * m_tileSize, 0);
+
+                // Calcula a posição do tile em pixels globais
+                double tilePxX = x * m_mapManager.TilePixelSize;
+                double tilePxY = y * m_mapManager.TilePixelSize;
+
+                // Calcula o offset em relação ao centro em pixels
+                double offsetX = tilePxX - centerPx.x;
+                double offsetY = -(tilePxY - centerPx.y); // Inverte Y para o sistema de coordenadas do Unity
+
+                // Converte o offset para unidades do Unity
+                float scale = m_tileSize / (float)m_mapManager.TilePixelSize;
+                Vector2 position = new Vector2((float)offsetX * scale, (float)offsetY * scale);
+                go.transform.localPosition = new Vector3(position.x, position.y, 0);
+
                 m_activeTiles[key] = go;
 
                 StartCoroutine(m_tileService.DownloadTile(x, y, Zoom, tex =>
                     ApplyTexture(key, go, x, y, Zoom, tex)
                 ));
             }
+        }
     }
 
     private void ApplyTexture(string key, GameObject go, int x, int y, int zoom, Texture2D tex)

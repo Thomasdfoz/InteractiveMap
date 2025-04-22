@@ -15,13 +15,15 @@ public class MapManager : MonoBehaviour
     [SerializeField, Tooltip("Sprite padrão para preencher os tiles que não possuem textura do servidor")] private Sprite m_defaultSprite;
 
     [Header("Map Settings")]
-    [SerializeField, Tooltip("Zoom inicial do mapa")] private int m_zoom = 2;
-    [SerializeField, Tooltip("Raio de tiles renderizados")] private int m_range = 2;
-    [SerializeField, Tooltip("Latitude central inicial")] private double m_centerLat = 0;
-    [SerializeField, Tooltip("Longitude central inicial")] private double m_centerLon = 0;
-    [SerializeField, Tooltip("Tamanho do tile em pixels")] private int m_tileSize = 256;
+    [SerializeField, Tooltip("Zoom inicial do mapa")] private int m_zoom;
+    [SerializeField, Tooltip("Raio de tiles renderizados")] private int m_range;
+    [SerializeField, Tooltip("Latitude central inicial")] private double m_centerLat;
+    [SerializeField, Tooltip("Longitude central inicial")] private double m_centerLon;
+    [SerializeField, Tooltip("Tamanho do tile em pixels")] private int m_tileSize;
 
     private TileManager m_tileManager;
+    private PinManager m_pinManager;
+    private GameObject m_mapContent;
 
     /// <summary>
     /// Zoom atual do mapa.
@@ -41,23 +43,30 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Raio de tiles.
     /// </summary>
-    public int Range { get => m_range; set => m_range = value; }
+    public int Range { get => m_range; }
+    public int TileSize { get => m_tileSize; }
+    public GameObject MapContent { get => m_mapContent; }
+    public int TilePixelSize { get; set; } = 256;
 
     private void Awake()
     {
         // 1) Background UI
         CreateBackground();
         // 2) Container para tiles (e TileManager)
-        var container = CreateMapContainer();
+        m_mapContent = CreateMapContainer();
 
         // 3) Configura tile service e manager
         ITileService service = new TileDownloaderService(m_downloader);
-        m_tileManager = container.AddComponent<TileManager>();
-        m_tileManager.Initialize(m_tilePrefab, m_tileSize, m_defaultSprite, service);
+        m_tileManager = m_mapContent.AddComponent<TileManager>();
+        m_tileManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, service);
         m_tileManager.Zoom = m_zoom;
         m_tileManager.CenterLat = m_centerLat;
         m_tileManager.CenterLon = m_centerLon;
         m_tileManager.Range = m_range;
+
+        //4) Configura o PinManager
+        m_pinManager = gameObject.AddComponent<PinManager>();
+        m_pinManager.Initialize(this);
 
         // 4) Inicializa InputController
         m_inputController.Initialize(this);
@@ -75,6 +84,14 @@ public class MapManager : MonoBehaviour
         m_tileManager.CenterLon = m_centerLon;
         m_tileManager.Range = m_range;
         m_tileManager.Render();
+        m_pinManager.UpdateAllPins();
+    }
+    /// <summary>
+    /// Adiciona um pin no mapa com coordenadas específicas.
+    /// </summary>
+    public void AddPin(GameObject pinPrefab, double lat, double lon)
+    {
+        m_pinManager.AddPin(pinPrefab, lat, lon);
     }
 
     private void CreateBackground()
@@ -94,6 +111,11 @@ public class MapManager : MonoBehaviour
     {
         GameObject go = new GameObject("MapContent");
         go.transform.SetParent(m_canvas.transform, false);
+        RectTransform rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.localPosition = Vector3.zero; // Posição inicial no centro
         return go;
     }
 }

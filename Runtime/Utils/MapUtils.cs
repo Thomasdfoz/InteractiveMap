@@ -1,12 +1,13 @@
+Ôªøusing System;
 using UnityEngine;
 
 /// <summary>
-/// FunÁıes utilit·rias para conversıes entre coordenadas geogr·ficas e tiles.
+/// Fun√ß√µes utilit√°rias para convers√µes entre coordenadas geogr√°ficas e tiles.
 /// </summary>
 public static class MapUtils
 {
     /// <summary>
-    /// Converte latitude e longitude para coordenadas de tile no nÌvel de zoom.
+    /// Converte latitude e longitude para coordenadas de tile no n√≠vel de zoom.
     /// </summary>
     public static Vector2Int LatLonToTile(double lat, double lon, int zoom)
     {
@@ -16,11 +17,26 @@ public static class MapUtils
     }
 
     /// <summary>
-    /// Verifica se a coordenada tile È v·lida dentro do range permitido pelo zoom.
+    /// Verifica se a coordenada tile √© v√°lida dentro do range permitido pelo zoom.
     /// </summary>
     public static bool IsValidTile(int x, int y, int zoom)
     {
         int max = 1 << zoom;
         return x >= 0 && x < max && y >= 0 && y < max;
+    }
+
+    public static Vector2 LatLonToPixels(double lat, double lon, int zoom, int tileSize)
+    {
+        // Convert latitude/longitude to Mercator meters
+        double x = (lon + 180.0) / 360.0;
+        double sinLat = Math.Sin(lat * Math.PI / 180.0);
+        double y = 0.5 - Math.Log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI);
+
+        // Calculate pixel coordinates at the given zoom level
+        double mapSize = tileSize * Math.Pow(2, zoom);
+        x = x * mapSize;
+        y = y * mapSize;
+
+        return new Vector2((float)x, (float)y);
     }
 }

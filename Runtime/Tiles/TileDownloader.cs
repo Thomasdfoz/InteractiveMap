@@ -5,10 +5,18 @@ using System;
 
 public class TileDownloader : MonoBehaviour
 {
-    private string tileURLTemplate = "http://localhost:8080/data/da-ilha-das-oncas-a-manaus/{0}/{1}/{2}.png";
+    //private string tileURLTemplate = "http://localhost:9090/data/da-ilha-das-oncas-a-manaus/{0}/{1}/{2}.png";
+    private string tileURLTemplate = "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
+    private int maxConcurrentDownloads = 4;
+    private int activeDownloads = 0;
 
     public IEnumerator DownloadTile(int x, int y, int zoom, Action<Texture2D> callback)
     {
+        while (activeDownloads >= maxConcurrentDownloads)
+            yield return null;
+
+        activeDownloads++;
+
         string url = string.Format(tileURLTemplate, zoom, x, y);
 
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
@@ -26,5 +34,8 @@ public class TileDownloader : MonoBehaviour
                 callback(tex);
             }
         }
+
+        activeDownloads--;
     }
+
 }
