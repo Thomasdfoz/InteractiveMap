@@ -5,27 +5,34 @@ using System;
 
 public class TileDownloader : MonoBehaviour
 {
-    private string tileURLTemplate = "http://localhost:9090/data/da-ilha-das-oncas-a-manaus/{0}/{1}/{2}.png";
-    //private string tileURLTemplate = "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
-    private int maxConcurrentDownloads = 4;
+    //[SerializeField] private string tileURL= "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
+    [Tooltip("URL parcial do mapa ex: 'da-ilha-das-oncas-a-manaus'")]
+    [SerializeField] private string tileURL;
+
+    private int maxConcurrentDownloads = 10;
     private int activeDownloads = 0;
 
-    public IEnumerator DownloadTile(int x, int y, float zoom, Action<Texture2D> callback)
+    public string TileURL => tileURL;
+
+    public IEnumerator DownloadTile(string baseUrl, float x, float y, float zoom, Action<Texture2D> callback)
     {
         while (activeDownloads >= maxConcurrentDownloads)
             yield return null;
 
         activeDownloads++;
 
-        string url = string.Format(tileURLTemplate, zoom, x, y);
+        // Monta a URL final usando base + tileURL
+        string path = string.Concat(tileURL, "/{0}/{1}/{2}.png");
+        string tilePath = string.Format(path, zoom, x, y);
+        string fullUrl = $"{baseUrl.TrimEnd('/')}/{tilePath}";
 
-        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
+        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(fullUrl))
         {
             yield return uwr.SendWebRequest();
 
             if (uwr.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogWarning($"Erro ao baixar tile {zoom}/{x}/{y}: {uwr.error}");
+                Debug.LogWarning($"Erro ao baixar tile: {fullUrl} => {uwr.error}");
                 callback(null);
             }
             else
@@ -37,5 +44,5 @@ public class TileDownloader : MonoBehaviour
 
         activeDownloads--;
     }
-
 }
+

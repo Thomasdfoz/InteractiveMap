@@ -15,11 +15,14 @@ public class MapManager : MonoBehaviour
     [SerializeField, Tooltip("Sprite padrão para preencher os tiles que não possuem textura do servidor")] private Sprite m_defaultSprite;
 
     [Header("Map Settings")]
+    [SerializeField, Tooltip("URL base do servidor de tiles")] private string m_baseUrl;
     [SerializeField, Tooltip("Zoom inicial do mapa")] private float m_zoom;
     [SerializeField, Tooltip("Raio de tiles renderizados")] private int m_range;
     [SerializeField, Tooltip("Latitude central inicial")] private double m_centerLat;
     [SerializeField, Tooltip("Longitude central inicial")] private double m_centerLon;
     [SerializeField, Tooltip("Tamanho do tile em pixels")] private int m_tileSize;
+    [SerializeField] private RectTransform m_centerReference;
+
 
     private TileManager m_tileManager;
     private PinManager m_pinManager;
@@ -47,6 +50,8 @@ public class MapManager : MonoBehaviour
     public int TileSize { get => m_tileSize; }
     public GameObject MapContent { get => m_mapContent; }
     public int TilePixelSize { get; set; } = 256;
+    public RectTransform CenterReference { get => m_centerReference; }
+    public string BaseUrl { get => m_baseUrl; }
 
     private void Awake()
     {
@@ -55,10 +60,8 @@ public class MapManager : MonoBehaviour
         // 2) Container para tiles (e TileManager)
         m_mapContent = CreateMapContainer();
 
-        // 3) Configura tile service e manager
-        ITileService service = new TileDownloaderService(m_downloader);
         m_tileManager = m_mapContent.AddComponent<TileManager>();
-        m_tileManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, service);
+        m_tileManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader);
         m_tileManager.Zoom = m_zoom;
         m_tileManager.CenterLat = m_centerLat;
         m_tileManager.CenterLon = m_centerLon;

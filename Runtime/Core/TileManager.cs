@@ -12,7 +12,7 @@ public class TileManager : MonoBehaviour
 {
     private GameObject m_tilePrefab;
     private int m_tileSize;
-    private ITileService m_tileService;
+    private TileDownloader m_tileDownloader;
     private MapManager m_mapManager;
     private ObjectPool<GameObject> m_tilePool;
     private readonly Dictionary<string, GameObject> m_activeTiles = new Dictionary<string, GameObject>();
@@ -40,11 +40,11 @@ public class TileManager : MonoBehaviour
     /// <summary>
     /// Inicializa o TileManager com prefab, tamanho e serviço de tiles.
     /// </summary>
-    public void Initialize(MapManager mapManager, GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, ITileService tileService)
+    public void Initialize(MapManager mapManager, GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, TileDownloader tileDownloader)
     {
         m_tilePrefab = tilePrefab;
         m_tileSize = tileSize;
-        m_tileService = tileService;
+        m_tileDownloader = tileDownloader;
         m_mapManager = mapManager;
 
         m_tilePool = new ObjectPool<GameObject>(
@@ -102,7 +102,7 @@ public class TileManager : MonoBehaviour
 
                 m_activeTiles[key] = go;
 
-                StartCoroutine(m_tileService.DownloadTile(x, y, Zoom, tex =>
+                StartCoroutine(m_tileDownloader.DownloadTile(m_mapManager.BaseUrl, x, y, Zoom, tex =>
                     ApplyTexture(key, go, x, y, Zoom, tex)
                 ));
             }

@@ -1,37 +1,43 @@
-using System;
+ï»¿using System;
+using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Controla zoom e pan do mapa via input do mouse.
-/// </summary>
 [DisallowMultipleComponent]
 public class InputController : MonoBehaviour
 {
     [Header("Zoom Limits")]
-    [SerializeField, Tooltip("Zoom mínimo permitido")] private int zoomMin = 0;
-    [SerializeField, Tooltip("Zoom máximo permitido")] private int zoomMax = 18;
+    [SerializeField] private int zoomMin = 0;
+    [SerializeField] private int zoomMax = 18;
 
     [Header("Pan Sensitivity")]
-    [SerializeField, Tooltip("Grau por pixel no zoom mínimo")] private float degreesAtMin = 0.001f;
-    [SerializeField, Tooltip("Grau por pixel no zoom máximo")] private float degreesAtMax = 0.0005f;
+    [SerializeField] private float panThreshold = 0.8f; // Quantidade de pan antes de re-renderizar
+    [SerializeField] private float panSpeed = 1f;
 
     private MapManager m_mapManager;
     private Vector3 lastMousePosition;
+    private Vector2 m_panOffset;
+    private RectTransform m_mapContent;
+
+    [SerializeField] private bool m_addPin;
+    [SerializeField] private bool m_pinwait;
     public GameObject PinPrefab;
 
-    /// <summary>
-    /// Inicializa o InputController com o MapManager alvo.
-    /// </summary>
     public void Initialize(MapManager mapManager)
     {
         m_mapManager = mapManager;
+        m_mapContent = m_mapManager.MapContent.GetComponent<RectTransform>();
     }
 
     private void Update()
     {
+        if (m_addPin)
+        {
+            HandlePin();
+            return;
+        }
+
         HandleZoom();
         HandlePan();
-        HandlePin();
     }
 
     private void HandleZoom()
@@ -39,55 +45,119 @@ public class InputController : MonoBehaviour
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Approximately(scroll, 0f)) return;
 
-        float newZoom = Mathf.Clamp(m_mapManager.Zoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
-        if (newZoom == m_mapManager.Zoom) return;
+        // 1) Captura estado antigo
+        float oldZoom = m_mapManager.Zoom;
+        double oldCenterLat = m_mapManager.CenterLat;
+        double oldCenterLon = m_mapManager.CenterLon;
 
+        // 2) Converte mouse âž” lat/lon
+        Vector2 mousePos = Input.mousePosition;
+        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Vector2 canvasOffset = mousePos - screenCenter;
+        canvasOffset.y = -canvasOffset.y;
+
+        float scale = m_mapManager.TileSize / (float)m_mapManager.TilePixelSize;
+        Vector2 centerPx = MapUtils.LatLonToPixels(oldCenterLat, oldCenterLon, oldZoom, m_mapManager.TilePixelSize);
+        Vector2 clickGlobalPx = centerPx + (canvasOffset / scale);
+        Vector2 clickLatLon = MapUtils.PixelsToLatLon(clickGlobalPx, oldZoom, m_mapManager.TilePixelSize);
+
+        // 3) Ajusta zoom
+        float newZoom = Mathf.Clamp(oldZoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
+        if (newZoom == oldZoom) return;
         m_mapManager.Zoom = newZoom;
+
+        // 4) Usa o ponto clicado como novo centro
+        m_mapManager.CenterLat = clickLatLon.x;
+        m_mapManager.CenterLon = clickLatLon.y;
+
+        // 5) Renderiza
         m_mapManager.RenderMap();
     }
-    private Vector2 panOffset;
+
     private void HandlePan()
     {
         if (Input.GetMouseButtonDown(0))
         {
             lastMousePosition = Input.mousePosition;
-            panOffset = Vector2.zero;
         }
 
         if (Input.GetMouseButton(0))
         {
-            Vector3 delta = Input.mousePosition - lastMousePosition;
-            panOffset += new Vector2(delta.x, delta.y);
-            // Move o MapContent em tempo real
-            m_mapManager.MapContent.GetComponent<RectTransform>().anchoredPosition = panOffset;
+            Vector2 delta = (Vector2)(Input.mousePosition - lastMousePosition);
+            m_panOffset += delta;
+            m_mapContent.anchoredPosition = m_panOffset;
             lastMousePosition = Input.mousePosition;
         }
 
-        if (Input.GetMouseButtonUp(0))
+        CheckPanThreshold(); // agora fora do botÃ£o do mouse
+    }
+
+    private void CheckPanThreshold()
+    {
+        float limit = m_mapManager.TileSize * panThreshold;
+        if (Mathf.Abs(m_panOffset.x) > limit || Mathf.Abs(m_panOffset.y) > limit)
         {
-            // Calcula o deslocamento em pixels globais
-            double mapWidthInPixels = m_mapManager.TilePixelSize * Math.Pow(2, m_mapManager.Zoom);
-            double degreesPerPixelLon = 360.0 / mapWidthInPixels;
-            // Ajusta a escala da latitude com base na projeção Mercator
-            double latRad = m_mapManager.CenterLat * Math.PI / 180.0;
-            double degreesPerPixelLat = degreesPerPixelLon / Math.Cos(latRad);
-
-            // Ajusta o centro com base no offset acumulado
-            m_mapManager.CenterLon -= panOffset.x * degreesPerPixelLon;
-            m_mapManager.CenterLat -= panOffset.y * degreesPerPixelLat;
-
-            // Reseta o offset e re-renderiza
-            panOffset = Vector2.zero;
-            m_mapManager.MapContent.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            UpdateCenterByVisualReference();
             m_mapManager.RenderMap();
+
+            m_panOffset = Vector2.zero;
+            m_mapContent.anchoredPosition = Vector2.zero;
         }
+    }
+
+    private void UpdateCenterByVisualReference()
+    {
+        Vector2 localCenter =m_mapManager.CenterReference.anchoredPosition;
+        Vector2 mapOffset = localCenter - m_mapContent.anchoredPosition;
+
+        // Converte para pixels globais
+        float scale = m_mapManager.TileSize / (float)m_mapManager.TilePixelSize;
+        Vector2 offsetPx = mapOffset / scale;
+        offsetPx.y = -offsetPx.y; // Corrige o Y pro sistema do mapa
+
+        // Calcula o novo centro em pixels
+        Vector2 centerPx = MapUtils.LatLonToPixels(
+            m_mapManager.CenterLat,
+            m_mapManager.CenterLon,
+            m_mapManager.Zoom,
+            m_mapManager.TilePixelSize);
+
+        Vector2 newCenterPx = centerPx + offsetPx;
+        Vector2 newLatLon = MapUtils.PixelsToLatLon(newCenterPx, m_mapManager.Zoom, m_mapManager.TilePixelSize);
+
+        m_mapManager.CenterLat = newLatLon.x;
+        m_mapManager.CenterLon = newLatLon.y;
     }
 
     private void HandlePin()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(0) && !m_pinwait)
         {
-            m_mapManager.AddPin(PinPrefab, -3.3074, -59.800);
+            Vector2 mouseCanvasPos = Input.mousePosition;
+            Vector2 centerPx = MapUtils.LatLonToPixels(
+                m_mapManager.CenterLat,
+                m_mapManager.CenterLon,
+                m_mapManager.Zoom,
+                m_mapManager.TilePixelSize);
+
+            float scale = m_mapManager.TileSize / (float)m_mapManager.TilePixelSize;
+            Vector2 offset = (mouseCanvasPos - new Vector2(Screen.width / 2f, Screen.height / 2f));
+            offset.y = -offset.y;
+            offset /= scale;
+
+            Vector2 pinPx = centerPx + offset;
+            Vector2 latlon = MapUtils.PixelsToLatLon(pinPx, m_mapManager.Zoom, m_mapManager.TilePixelSize);
+            m_mapManager.AddPin(PinPrefab, latlon.x, latlon.y);
+
+            StartCoroutine(PinWait());
         }
+    }
+
+    private IEnumerator PinWait()
+    {
+        m_pinwait = true;
+        yield return new WaitForSeconds(1f);
+        m_addPin = false;
+        m_pinwait = false;
     }
 }
