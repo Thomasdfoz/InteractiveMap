@@ -45,32 +45,29 @@ public class InputController : MonoBehaviour
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Approximately(scroll, 0f)) return;
 
-        // 1) Captura estado antigo
-        float oldZoom = m_mapManager.Zoom;
-        double oldCenterLat = m_mapManager.CenterLat;
-        double oldCenterLon = m_mapManager.CenterLon;
-
-        // 2) Converte mouse ➔ lat/lon
+        // 1) Converte mouse ➔ lat/lon
         Vector2 mousePos = Input.mousePosition;
         Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Vector2 canvasOffset = mousePos - screenCenter;
         canvasOffset.y = -canvasOffset.y;
 
         float scale = m_mapManager.TileSize / (float)m_mapManager.TilePixelSize;
-        Vector2 centerPx = MapUtils.LatLonToPixels(oldCenterLat, oldCenterLon, oldZoom, m_mapManager.TilePixelSize);
+        Vector2 centerPx = MapUtils.LatLonToPixels(m_mapManager.CenterLat, m_mapManager.CenterLon, m_mapManager.Zoom, m_mapManager.TilePixelSize);
         Vector2 clickGlobalPx = centerPx + (canvasOffset / scale);
-        Vector2 clickLatLon = MapUtils.PixelsToLatLon(clickGlobalPx, oldZoom, m_mapManager.TilePixelSize);
+        Vector2 clickLatLon = MapUtils.PixelsToLatLon(clickGlobalPx, m_mapManager.Zoom, m_mapManager.TilePixelSize);
 
-        // 3) Ajusta zoom
+        // 2) Ajusta zoom
+        float oldZoom = m_mapManager.Zoom;
         float newZoom = Mathf.Clamp(oldZoom + (scroll > 0f ? 1 : -1), zoomMin, zoomMax);
         if (newZoom == oldZoom) return;
-        m_mapManager.Zoom = newZoom;
 
-        // 4) Usa o ponto clicado como novo centro
+        // 3) Atualiza o centro para a posição do mouse
         m_mapManager.CenterLat = clickLatLon.x;
         m_mapManager.CenterLon = clickLatLon.y;
+      
+        m_mapManager.Zoom = newZoom;
 
-        // 5) Renderiza
+        // 4) Renderiza
         m_mapManager.RenderMap();
     }
 
