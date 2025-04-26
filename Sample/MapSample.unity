@@ -435,6 +435,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1488723600}
+  - component: {fileID: 1488723604}
   - component: {fileID: 1488723603}
   - component: {fileID: 1488723602}
   m_Layer: 0
@@ -471,7 +472,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04b084f5e239f6348ad57bbe2385f7dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileURL: osm-bright
 --- !u!114 &1488723603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -484,18 +484,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eca0cbcda590b54d9bd887f4c83d809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1488723604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488723599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 702e38c1e95af074c936a62b0517db27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_canvas: {fileID: 564601655}
   m_tilePrefab: {fileID: 1441361277640032913, guid: 77a271ddf8817184896015dd5c762ae9, type: 3}
   m_downloader: {fileID: 1488723602}
   m_inputController: {fileID: 1461875014}
   m_defaultSprite: {fileID: 21300000, guid: 81eb8a6838314cd46803cce2bced638b, type: 3}
-  m_baseUrl: http://localhost:8080/styles/
-  m_zoom: 3
-  m_range: 10
-  m_centerLat: -25.87
-  m_centerLon: -21.09
+  m_baseUrl: 
   m_tileSize: 128
   m_centerReference: {fileID: 1287605991}
+  maps:
+  - URL: http://localhost:9090/data/da-ilha-das-oncas-a-manaus
+    Zoom: 13
+    Range: 10
+    CenterLat: -3.19167
+    CenterLon: -59.78666
+    TilePixelSize: 128
+  mapManager: {fileID: 1488723603}
+--- !u!1 &1639156077
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1639156078}
+  m_Layer: 0
+  m_Name: GlobalManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1639156078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1639156077}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3640.9626, y: 9666.733, z: -5838.582}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1916635303
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,3 +735,4 @@ SceneRoots:
   - {fileID: 1461875013}
   - {fileID: 564601656}
   - {fileID: 714669987}
+  - {fileID: 1639156078}

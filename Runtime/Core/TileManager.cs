@@ -66,12 +66,12 @@ public class TileManager : MonoBehaviour
         ReleaseAll();
 
         // Calcula o centro em pixels globais
-        Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, Zoom, m_mapManager.TilePixelSize);
+        Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, Zoom, m_mapManager.MapSettings.TilePixelSize);
 
 
         // Calcula as coordenadas do tile central a partir do centro em pixels
-        int centerTileX = (int)Math.Floor(centerPx.x / m_mapManager.TilePixelSize);
-        int centerTileY = (int)Math.Floor(centerPx.y / m_mapManager.TilePixelSize);
+        int centerTileX = (int)Math.Floor(centerPx.x / m_mapManager.MapSettings.TilePixelSize);
+        int centerTileY = (int)Math.Floor(centerPx.y / m_mapManager.MapSettings.TilePixelSize);
 
         for (int dx = -Range; dx <= Range; dx++)
         {
@@ -88,21 +88,21 @@ public class TileManager : MonoBehaviour
                 go.transform.SetParent(transform, false);
 
                 // Calcula a posição do tile em pixels globais
-                double tilePxX = x * m_mapManager.TilePixelSize;
-                double tilePxY = y * m_mapManager.TilePixelSize;
+                double tilePxX = x * m_mapManager.MapSettings.TilePixelSize;
+                double tilePxY = y * m_mapManager.MapSettings.TilePixelSize;
 
                 // Calcula o offset em relação ao centro em pixels
                 double offsetX = tilePxX - centerPx.x;
                 double offsetY = -(tilePxY - centerPx.y); // Inverte Y para o sistema de coordenadas do Unity
 
                 // Converte o offset para unidades do Unity
-                float scale = m_tileSize / (float)m_mapManager.TilePixelSize;
+                float scale = m_tileSize / (float)m_mapManager.MapSettings.TilePixelSize;
                 Vector2 position = new Vector2((float)offsetX * scale, (float)offsetY * scale);
                 go.transform.localPosition = new Vector3(position.x, position.y, 0);
 
                 m_activeTiles[key] = go;
 
-                StartCoroutine(m_tileDownloader.DownloadTile(m_mapManager.BaseUrl, x, y, Zoom, tex =>
+                StartCoroutine(m_tileDownloader.DownloadTile(m_mapManager.MapSettings.URL, x, y, Zoom, tex =>
                     ApplyTexture(key, go, x, y, Zoom, tex)
                 ));
             }
@@ -111,7 +111,12 @@ public class TileManager : MonoBehaviour
 
     private void ApplyTexture(string key, GameObject go, int x, int y, float zoom, Texture2D tex)
     {
-        if (tex == null || !m_activeTiles.TryGetValue(key, out GameObject active)) return;
+        if (tex == null)
+        {
+            go.SetActive(false);
+            return;
+        }
+        if (!m_activeTiles.TryGetValue(key, out GameObject active)) return;
 
         Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
         active.GetComponent<Tile>()?.SetTile(sprite);

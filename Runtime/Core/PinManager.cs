@@ -40,7 +40,7 @@ public class PinManager : MonoBehaviour
     }
 
     private void UpdatePin(GameObject pin, double lat, double lon)
-    {
+    {/*
         // Pega as propriedades do mapa (ajuste conforme sua estrutura)
         double centerLat = m_mapManager.CenterLat;
         double centerLon = m_mapManager.CenterLon;
@@ -62,6 +62,6 @@ public class PinManager : MonoBehaviour
 
         // Aplica a posição no pin
         RectTransform rt = pin.GetComponent<RectTransform>();
-        rt.localPosition = offset;
+        rt.localPosition = offset;*/
     }
 }

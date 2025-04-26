@@ -27,7 +27,7 @@ public class InputController : MonoBehaviour
         m_mapManager = mapManager;
         m_mapContent = m_mapManager.MapContent.GetComponent<RectTransform>();
     }
-
+    /*
     private void Update()
     {
         if (m_addPin)
@@ -148,7 +148,7 @@ public class InputController : MonoBehaviour
 
             StartCoroutine(PinWait());
         }
-    }
+    }*/
 
     private IEnumerator PinWait()
     {

@@ -7,12 +7,12 @@ public class TileDownloader : MonoBehaviour
 {
     //[SerializeField] private string tileURL= "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
     [Tooltip("URL parcial do mapa ex: 'da-ilha-das-oncas-a-manaus'")]
-    [SerializeField] private string tileURL;
+    //[SerializeField] private string tileURL;
 
     private int maxConcurrentDownloads = 10;
     private int activeDownloads = 0;
 
-    public string TileURL => tileURL;
+    //public string TileURL => tileURL;
 
     public IEnumerator DownloadTile(string baseUrl, float x, float y, float zoom, Action<Texture2D> callback)
     {
@@ -22,9 +22,8 @@ public class TileDownloader : MonoBehaviour
         activeDownloads++;
 
         // Monta a URL final usando base + tileURL
-        string path = string.Concat(tileURL, "/{0}/{1}/{2}.png");
-        string tilePath = string.Format(path, zoom, x, y);
-        string fullUrl = $"{baseUrl.TrimEnd('/')}/{tilePath}";
+        string path = string.Concat(baseUrl, "/{0}/{1}/{2}.png");
+        string fullUrl = string.Format(path, zoom, x, y);
 
         using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(fullUrl))
         {
