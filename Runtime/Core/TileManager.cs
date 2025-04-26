@@ -50,7 +50,7 @@ public class TileManager : MonoBehaviour
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
             actionOnGet: tile => tile.SetActive(true),
-            actionOnRelease: tile => tile.GetComponent<Tile>()?.SetTile(m_defaultSprite),
+            actionOnRelease: tile => tile.SetActive(false),
             actionOnDestroy: Destroy,
             collectionCheck: false,
             defaultCapacity: 100,
