@@ -53,7 +53,7 @@ public class GlobalManager : MonoBehaviour
         CreateBackground();
 
         m_mapManagerGlobal = CreateMapContent(m_mapGlobal.name, m_canvas.transform);
-        m_mapManagerGlobal.Initialize(this, m_mapManagerGlobal.transform, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, m_mapGlobal);
+        m_mapManagerGlobal.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, m_mapGlobal);
 
         m_pinManager = m_mapManagerGlobal.gameObject.AddComponent<PinManager>();
         m_pinManager.Initialize(this);
@@ -62,7 +62,7 @@ public class GlobalManager : MonoBehaviour
         {
             MapManager mapManager = CreateMapContent(map.name, MapGlobalContentTransform);          
             AddPin(mapManager.gameObject, map.CenterLat, CenterLon);
-            mapManager.Initialize(this, m_mapManagerGlobal.transform, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, map);
+            mapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, map);
         }
 
         RenderMap();
@@ -81,8 +81,22 @@ public class GlobalManager : MonoBehaviour
     {
         m_mapManagerGlobal.RenderMap();
         m_pinManager.UpdateAllPins();
+        CorrigirCentroPreciso();
     }
+    private void CorrigirCentroPreciso()
+    {
+        RectTransform mapContent = m_mapManagerGlobal.MapContent.GetComponent<RectTransform>();
 
+        // Calcula onde o centro global deveria estar
+        Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, Zoom, TilePixelSize);
+        float scale = TileSize / (float)TilePixelSize;
+
+        // Converte centerPx para world units
+        float offsetX = (float)((centerPx.x % TilePixelSize) / TilePixelSize - 0.5f) * TileSize;
+        float offsetY = -(float)((centerPx.y % TilePixelSize) / TilePixelSize - 0.5f) * TileSize;
+
+        mapContent.localPosition = new Vector2(offsetX, offsetY);
+    }
     private MapManager CreateMapContent(string name, Transform parent)
     {
         GameObject bgGO = new GameObject(name);

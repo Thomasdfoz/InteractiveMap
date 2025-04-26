@@ -19,12 +19,12 @@ public class MapManager : MonoBehaviour
     public GameObject MapContent { get => m_mapContent; }
     public MapConfig MapSettings { get => mapSettings; }
 
-    public void Initialize(GlobalManager globalManager, Transform Contentparent,GameObject tileprefab, int tileSize, Sprite m_defaultSprite, TileDownloader m_downloader, MapConfig settings)
+    public void Initialize(GlobalManager globalManager,GameObject tileprefab, int tileSize, Sprite m_defaultSprite, TileDownloader m_downloader, MapConfig settings)
     {
         mapSettings = settings;
         m_globalManager = globalManager;
         // 1) Container para tiles (e TileManager)
-        m_mapContent = CreateMapContainer(Contentparent);
+        m_mapContent = CreateMapContainer(transform);
 
         m_tileManager = m_mapContent.AddComponent<TileManager>();
         m_tileManager.Initialize(this, tileprefab, tileSize, m_defaultSprite, m_downloader);
