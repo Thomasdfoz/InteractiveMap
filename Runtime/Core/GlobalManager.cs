@@ -81,22 +81,8 @@ public class GlobalManager : MonoBehaviour
     {
         m_mapManagerGlobal.RenderMap();
         m_pinManager.UpdateAllPins();
-        CorrigirCentroPreciso();
     }
-    private void CorrigirCentroPreciso()
-    {
-        RectTransform mapContent = m_mapManagerGlobal.MapContent.GetComponent<RectTransform>();
-
-        // Calcula onde o centro global deveria estar
-        Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, Zoom, TilePixelSize);
-        float scale = TileSize / (float)TilePixelSize;
-
-        // Converte centerPx para world units
-        float offsetX = (float)((centerPx.x % TilePixelSize) / TilePixelSize - 0.5f) * TileSize;
-        float offsetY = -(float)((centerPx.y % TilePixelSize) / TilePixelSize - 0.5f) * TileSize;
-
-        mapContent.localPosition = new Vector2(offsetX, offsetY);
-    }
+   
     private MapManager CreateMapContent(string name, Transform parent)
     {
         GameObject bgGO = new GameObject(name);
