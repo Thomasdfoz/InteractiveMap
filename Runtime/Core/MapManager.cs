@@ -9,20 +9,20 @@ using static UnityEngine.Rendering.RayTracingAccelerationStructure;
 public class MapManager : MonoBehaviour
 {
     private TileManager m_tileManager;
-    private PinManager m_pinManager;
     private GameObject m_mapContent;
-    private MapSettings mapSettings;
+    private MapConfig mapSettings;
+    private GlobalManager m_globalManager;
 
     /// <summary>
     /// Raio de tiles.
     /// </summary>
     public GameObject MapContent { get => m_mapContent; }
-    public MapSettings MapSettings { get => mapSettings; }
+    public MapConfig MapSettings { get => mapSettings; }
 
-    public void Initialize(Transform Contentparent,GameObject tileprefab, int tileSize, Sprite m_defaultSprite, TileDownloader m_downloader, MapSettings settings)
+    public void Initialize(GlobalManager globalManager, Transform Contentparent,GameObject tileprefab, int tileSize, Sprite m_defaultSprite, TileDownloader m_downloader, MapConfig settings)
     {
         mapSettings = settings;
-
+        m_globalManager = globalManager;
         // 1) Container para tiles (e TileManager)
         m_mapContent = CreateMapContainer(Contentparent);
 
@@ -33,11 +33,6 @@ public class MapManager : MonoBehaviour
         m_tileManager.CenterLon = settings.CenterLon;
         m_tileManager.Range = settings.Range;
 
-        //2) Configura o PinManager
-        m_pinManager = gameObject.AddComponent<PinManager>();
-        m_pinManager.Initialize(this);
-
-        RenderMap();
     }
 
     /// <summary>
@@ -45,12 +40,11 @@ public class MapManager : MonoBehaviour
     /// </summary>
     public void RenderMap()
     {
-        m_tileManager.Zoom = mapSettings.Zoom;
-        m_tileManager.CenterLat = mapSettings.CenterLat;
-        m_tileManager.CenterLon = mapSettings.CenterLon;
+        m_tileManager.Zoom = m_globalManager.Zoom;
+        m_tileManager.CenterLat = m_globalManager.CenterLat;
+        m_tileManager.CenterLon = m_globalManager.CenterLon;
         m_tileManager.Range = mapSettings.Range;
         m_tileManager.Render();
-        m_pinManager.UpdateAllPins();
     }
    
 

@@ -3,27 +3,29 @@ using UnityEngine;
 
 public class PinManager : MonoBehaviour
 {
-    private MapManager m_mapManager;
+    private GlobalManager m_globalManager;
     private List<GameObject> m_pins = new List<GameObject>();
 
-    public void Initialize(MapManager mgr)
+    public void Initialize(GlobalManager mapGlobal)
     {
-        m_mapManager = mgr;
+        m_globalManager = mapGlobal;
     }
 
     public void AddPin(GameObject pinPrefab, double lat, double lon)
     {
-        var go = Instantiate(pinPrefab, m_mapManager.MapContent.transform);
+        var go = Instantiate(pinPrefab, m_globalManager.MapGlobalContentTransform);
         go.name = $"Pin_{lat}_{lon}";
         m_pins.Add(go);
 
-        // AQUI! Setar os dados no PinData
-        var pinData = go.GetComponent<PinData>();
-        if (pinData != null)
+
+        if (!go.TryGetComponent<PinData>(out PinData pinData))
         {
-            pinData.Latitude = lat;
-            pinData.Longitude = lon;
+            if (pinData == null)
+                pinData = go.AddComponent<PinData>();
         }
+
+        pinData.Latitude = lat;
+        pinData.Longitude = lon;
 
         UpdatePin(go, lat, lon);
     }
@@ -40,12 +42,12 @@ public class PinManager : MonoBehaviour
     }
 
     private void UpdatePin(GameObject pin, double lat, double lon)
-    {/*
+    {
         // Pega as propriedades do mapa (ajuste conforme sua estrutura)
-        double centerLat = m_mapManager.CenterLat;
-        double centerLon = m_mapManager.CenterLon;
-        float zoom = m_mapManager.Zoom;
-        int tilePixelSize = m_mapManager.TilePixelSize; // ex: 256
+        double centerLat = m_globalManager.CenterLat;
+        double centerLon = m_globalManager.CenterLon;
+        float zoom = m_globalManager.Zoom;
+        int tilePixelSize = m_globalManager.TilePixelSize; // ex: 256
 
         // Calcula o centro em pixels globais
         Vector2 centerPx = MapUtils.LatLonToPixels(centerLat, centerLon, zoom, tilePixelSize);
@@ -57,11 +59,11 @@ public class PinManager : MonoBehaviour
         offset.y = -offset.y; // Inverte o Y pra coordenadas do Unity
 
         // Converte de pixels pra unidades do Unity
-        float scale = m_mapManager.TileSize / (float)tilePixelSize; // ex: TileSize em unidades do Unity
+        float scale = m_globalManager.TileSize / (float)tilePixelSize; // ex: TileSize em unidades do Unity
         offset *= scale;
 
         // Aplica a posição no pin
         RectTransform rt = pin.GetComponent<RectTransform>();
-        rt.localPosition = offset;*/
+        rt.localPosition = offset;
     }
 }
