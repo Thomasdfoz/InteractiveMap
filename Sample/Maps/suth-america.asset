@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: suth america
   URL: http://localhost:8080/styles/maptiler-basic
-  Zoom: 2
+  Zoom: 5
   Range: 10
-  CenterLat: 0
-  CenterLon: 0
+  CenterLat: -25
+  CenterLon: -59
   TilePixelSize: 256
