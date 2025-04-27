@@ -1,7 +1,10 @@
 using UnityEngine;
 
-public class PinData : MonoBehaviour
+namespace EGS.Pin
 {
-    public double Latitude;
-    public double Longitude;
+    public class PinData : MonoBehaviour
+    {
+        public double Latitude;
+        public double Longitude;
+    }
 }
