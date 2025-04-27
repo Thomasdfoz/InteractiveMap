@@ -19,7 +19,7 @@ public class MapManager : MonoBehaviour
     public GameObject MapContent { get => m_mapContent; }
     public MapConfig MapSettings { get => mapSettings; }
 
-    public void Initialize(GlobalManager globalManager,GameObject tileprefab, int tileSize, Sprite m_defaultSprite, TileDownloader m_downloader, MapConfig settings)
+    public void Initialize(GlobalManager globalManager,GameObject tileprefab, int tileSize, Texture2D m_defaultTexture, TileDownloader m_downloader, MapConfig settings)
     {
         mapSettings = settings;
         m_globalManager = globalManager;
@@ -27,7 +27,7 @@ public class MapManager : MonoBehaviour
         m_mapContent = CreateMapContainer(transform);
 
         m_tileManager = m_mapContent.AddComponent<TileManager>();
-        m_tileManager.Initialize(this, tileprefab, tileSize, m_defaultSprite, m_downloader);
+        m_tileManager.Initialize(this, tileprefab, tileSize, m_defaultTexture, m_downloader);
         m_tileManager.Zoom = settings.Zoom;
         m_tileManager.CenterLat = settings.CenterLat;
         m_tileManager.CenterLon = settings.CenterLon;

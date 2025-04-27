@@ -8,7 +8,7 @@ public class GlobalManager : MonoBehaviour
     [SerializeField, Tooltip("Prefab do tile")] private GameObject m_tilePrefab;
     [SerializeField, Tooltip("Componente de download de tiles")] private TileDownloader m_downloader;
     [SerializeField, Tooltip("Componente de InputController para zoom/pan")] private InputController m_inputController;
-    [SerializeField, Tooltip("Sprite padr�o para preencher os tiles que n�o possuem textura do servidor")] private Sprite m_defaultSprite;
+    [SerializeField, Tooltip("Texture padrao para preencher os tiles que n�o possuem textura do servidor")] private Texture2D m_defaultTexture;
 
     [Header("Map Settings")]
     [SerializeField, Tooltip("Tamanho do tile em pixels")] private int m_tileSize;
@@ -53,7 +53,7 @@ public class GlobalManager : MonoBehaviour
         CreateBackground();
 
         m_mapManagerGlobal = CreateMapContent(m_mapGlobal.name, m_canvas.transform);
-        m_mapManagerGlobal.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, m_mapGlobal);
+        m_mapManagerGlobal.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
 
         m_pinManager = m_mapManagerGlobal.gameObject.AddComponent<PinManager>();
         m_pinManager.Initialize(this);
@@ -62,7 +62,7 @@ public class GlobalManager : MonoBehaviour
         {
             MapManager mapManager = CreateMapContent(map.name, MapGlobalContentTransform);          
             AddPin(mapManager.gameObject, map.CenterLat, CenterLon);
-            mapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultSprite, m_downloader, map);
+            mapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
         }
 
         RenderMap();
@@ -100,7 +100,8 @@ public class GlobalManager : MonoBehaviour
     {
         GameObject bgGO = new GameObject("Background");
         Image img = bgGO.AddComponent<Image>();
-        img.sprite = m_defaultSprite;
+        Sprite sprite = Sprite.Create(m_defaultTexture, new Rect(0, 0, m_defaultTexture.width, m_defaultTexture.height), new Vector2(0.5f, 0.5f), 100);
+        img.sprite = sprite;
         img.transform.SetParent(m_canvas.transform, false);
         RectTransform rt = img.GetComponent<RectTransform>();
         rt.anchorMin = Vector2.zero;

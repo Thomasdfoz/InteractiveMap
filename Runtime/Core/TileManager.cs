@@ -41,7 +41,7 @@ public class TileManager : MonoBehaviour
     /// <summary>
     /// Inicializa o TileManager com prefab, tamanho e serviço de tiles.
     /// </summary>
-    public void Initialize(MapManager mapManager, GameObject tilePrefab, int tileSize, Sprite m_defaultSprite, TileDownloader tileDownloader)
+    public void Initialize(MapManager mapManager, GameObject tilePrefab, int tileSize, Texture2D m_defaultTexture, TileDownloader tileDownloader)
     {
         m_tilePrefab = tilePrefab;
         m_tileSize = tileSize;
@@ -51,7 +51,7 @@ public class TileManager : MonoBehaviour
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
             actionOnGet: tile => tile.SetActive(true),
-            actionOnRelease: tile => tile.GetComponent<Image>().sprite = m_defaultSprite,
+            actionOnRelease: tile => tile.GetComponent<RawImage>().texture = m_defaultTexture,
             actionOnDestroy: Destroy,
             collectionCheck: false,
             defaultCapacity: 100,
@@ -119,8 +119,8 @@ public class TileManager : MonoBehaviour
         }
         if (!m_activeTiles.TryGetValue(key, out GameObject active)) return;
 
-        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
-        active.GetComponent<Tile>()?.SetTile(sprite);
+        //Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+        active.GetComponent<Tile>()?.SetTile(tex);
     }
 
     private void ReleaseAll()
