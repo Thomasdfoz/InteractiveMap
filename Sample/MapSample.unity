@@ -419,7 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0ebf7e62d1408c4087de5f960593679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoomMin: 1
+  zoomMin: 5
   zoomMax: 16
   panThreshold: 7
   panSpeed: 1
@@ -493,6 +493,9 @@ MonoBehaviour:
   m_mapGlobal: {fileID: 11400000, guid: 3dec3099259a6d04fb0bf7e1b50a2bf5, type: 2}
   m_maps:
   - {fileID: 11400000, guid: 2f91377b8e3d8c248944f1c70d6832ea, type: 2}
+  - {fileID: 11400000, guid: 34508b86b9f0be349a783a94cc7b93eb, type: 2}
+  - {fileID: 11400000, guid: 334788bccc3ac804c98adab7a955c8c8, type: 2}
+  - {fileID: 11400000, guid: ee441dd6b8a2d894c8004fd3ce85a6c6, type: 2}
 --- !u!1 &1916635303
 GameObject:
   m_ObjectHideFlags: 0

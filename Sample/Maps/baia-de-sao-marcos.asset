@@ -10,15 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 582939fe5e2ab8449bce86b0ba5ae71c, type: 3}
-  m_Name: da-ilha-das-oncas-a-manaus
+  m_Name: baia-de-sao-marcos
   m_EditorClassIdentifier: 
-  Name: da-ilha-das-oncas-a-manaus
-  URL: http://localhost:9090/data/da-ilha-das-oncas-a-manaus
-  Zoom: 13
-  ZoomMin: 10
-  ZoomMax: 16
+  Name: baia-de-sao-marcos
+  URL: http://localhost:9090/data/baia-de-sao-marcos
+  ZoomMin: 11
+  ZoomMax: 17
   Range: 5
-  CenterLat: -3.19167
-  CenterLon: -59.78666
   TilePixelSize: 128
+  Zoom: 14
+  CenterLat: -44.31666793668823
+  CenterLon: -2.4958354738668387
+  MinLon: -44.43333330000001
+  MinLat: -2.591670955302198
+  MaxLon: -44.200002573376466
+  MaxLat: -2.399999992431479
   MapManager: {fileID: 0}

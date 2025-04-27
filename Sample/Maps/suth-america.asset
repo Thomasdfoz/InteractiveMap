@@ -15,7 +15,10 @@ MonoBehaviour:
   Name: suth america
   URL: http://localhost:8080/styles/maptiler-basic
   Zoom: 5
+  ZoomMin: 5
+  ZoomMax: 16
   Range: 10
   CenterLat: -25
   CenterLon: -59
   TilePixelSize: 256
+  MapManager: {fileID: 0}

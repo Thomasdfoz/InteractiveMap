@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Tilemaps.TilemapRenderer;
 
 public class PinManager : MonoBehaviour
 {
@@ -11,12 +12,17 @@ public class PinManager : MonoBehaviour
         m_globalManager = mapGlobal;
     }
 
-    public void AddPin(GameObject pinPrefab, double lat, double lon)
+    public void AddPin(GameObject pinPrefab, double lat, double lon, int sortOrder)
     {
         var go = Instantiate(pinPrefab, m_globalManager.MapGlobalContentTransform);
         go.name = $"Pin_{lat}_{lon}";
         m_pins.Add(go);
-
+        if (sortOrder > 0)
+        {
+            Canvas can = go.AddComponent<Canvas>();
+            can.overrideSorting = true;
+            can.sortingOrder = sortOrder;
+        }
 
         if (!go.TryGetComponent<PinData>(out PinData pinData))
         {

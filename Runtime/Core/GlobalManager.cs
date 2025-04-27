@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class GlobalManager : MonoBehaviour
@@ -17,7 +18,6 @@ public class GlobalManager : MonoBehaviour
     [SerializeField] private MapConfig[] m_maps;
 
     private PinManager m_pinManager;
-    private MapManager m_mapManagerGlobal;
     private double m_centerLon;
     private double m_centerLat;
     private float m_zoom;
@@ -37,14 +37,14 @@ public class GlobalManager : MonoBehaviour
     /// </summary>
     public double CenterLon { get => m_centerLon; set => m_centerLon = value; }
 
-    public Transform MapGlobalContentTransform => m_mapManagerGlobal.MapContent.transform;
-    public RectTransform CenterReference { get => m_centerReference;}
+    public Transform MapGlobalContentTransform => m_mapGlobal.MapManager.MapContent.transform;
+    public RectTransform CenterReference { get => m_centerReference; }
 
     public int TilePixelSize => m_mapGlobal.TilePixelSize;
     public int TileSize => m_tileSize;
 
 
-    private void Awake()
+    private IEnumerator Start()
     {
         m_centerLat = m_mapGlobal.CenterLat;
         m_centerLon = m_mapGlobal.CenterLon;
@@ -52,17 +52,17 @@ public class GlobalManager : MonoBehaviour
 
         CreateBackground();
 
-        m_mapManagerGlobal = CreateMapContent(m_mapGlobal.name, m_canvas.transform);
-        m_mapManagerGlobal.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
+        m_mapGlobal.MapManager = CreateMapContent(m_mapGlobal.name, m_canvas.transform, 1);
+        yield return m_mapGlobal.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
 
-        m_pinManager = m_mapManagerGlobal.gameObject.AddComponent<PinManager>();
+        m_pinManager = m_mapGlobal.MapManager.gameObject.AddComponent<PinManager>();
         m_pinManager.Initialize(this);
 
         foreach (var map in m_maps)
         {
-            MapManager mapManager = CreateMapContent(map.name, MapGlobalContentTransform);          
-            AddPin(mapManager.gameObject, map.CenterLat, CenterLon);
-            mapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
+            map.MapManager = CreateMapContent(map.name, MapGlobalContentTransform, 10);
+            AddPin(map.MapManager.gameObject, map.CenterLat, CenterLon);
+            yield return map.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
         }
 
         RenderMap();
@@ -72,23 +72,48 @@ public class GlobalManager : MonoBehaviour
     /// <summary>
     /// Adiciona um pin no mapa com coordenadas específicas.
     /// </summary>
-    public void AddPin(GameObject pinPrefab, double lat, double lon)
-    {       
-        m_pinManager.AddPin(pinPrefab, lat, lon);
+    public void AddPin(GameObject pinPrefab, double lat, double lon, int sortOrder = 0)
+    {
+        m_pinManager.AddPin(pinPrefab, lat, lon, sortOrder);
     }
 
     public void RenderMap()
     {
-        m_mapManagerGlobal.RenderMap();
+        // 1) renderiza global
+        m_mapGlobal.MapManager.RenderMap();
+
+        // 3) percorre cada mapa náutico
+        foreach (var map in m_maps)
+        {
+            var mgr = map.MapManager;
+
+            // zoom dentro do intervalo?
+            bool inZoom = (Zoom >= map.ZoomMin && Zoom <= map.ZoomMax);
+
+            // centro global dentro da caixa?
+            bool inBounds = CenterLon >= map.MinLon && CenterLon <= map.MaxLon
+                         && CenterLat >= map.MinLat && CenterLat <= map.MaxLat;
+
+            // só renderiza se zoom E bounds OK
+            if (inZoom && inBounds)
+                mgr.RenderMap();
+            else
+                mgr.ReleaseMap();
+        }
+
+        // 4) atualiza pins (caso eles dependam de todos os mapas)
         m_pinManager.UpdateAllPins();
     }
-   
-    private MapManager CreateMapContent(string name, Transform parent)
+
+    private MapManager CreateMapContent(string name, Transform parent, int sortOrder)
     {
         GameObject bgGO = new GameObject(name);
         bgGO.transform.SetParent(parent, false);
         RectTransform rt = bgGO.AddComponent<RectTransform>();
         MapManager mapManager = bgGO.AddComponent<MapManager>();
+        Canvas can = bgGO.AddComponent<Canvas>();
+        can.overrideSorting = true;
+        can.sortingOrder = sortOrder;
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.one;
         rt.offsetMin = new Vector2(-500, -500);

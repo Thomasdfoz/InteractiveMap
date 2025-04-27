@@ -51,7 +51,7 @@ public class TileManager : MonoBehaviour
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
             actionOnGet: tile => tile.SetActive(true),
-            actionOnRelease: tile => tile.GetComponent<RawImage>().texture = m_defaultTexture,
+            actionOnRelease: tile => { tile.GetComponent<RawImage>().texture = m_defaultTexture; tile.SetActive(false); },
             actionOnDestroy: Destroy,
             collectionCheck: false,
             defaultCapacity: 100,
@@ -98,7 +98,7 @@ public class TileManager : MonoBehaviour
                 double offsetY = -(tilePxY - centerPx.y); // Inverte Y para o sistema de coordenadas do Unity
 
                 // Converte o offset para unidades do Unity
-                double scale =  (double)m_tileSize / (double)m_mapManager.MapSettings.TilePixelSize;
+                double scale = (double)m_tileSize / (double)m_mapManager.MapSettings.TilePixelSize;
                 go.transform.localPosition = new Vector3((float)(offsetX * scale), (float)(offsetY * scale), 0);
 
                 m_activeTiles[key] = go;
@@ -123,7 +123,7 @@ public class TileManager : MonoBehaviour
         active.GetComponent<Tile>()?.SetTile(tex);
     }
 
-    private void ReleaseAll()
+    public void ReleaseAll()
     {
         foreach (var go in m_activeTiles.Values)
             m_tilePool.Release(go);

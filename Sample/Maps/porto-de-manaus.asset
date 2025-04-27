@@ -10,15 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 582939fe5e2ab8449bce86b0ba5ae71c, type: 3}
-  m_Name: da-ilha-das-oncas-a-manaus
+  m_Name: porto-de-manaus
   m_EditorClassIdentifier: 
-  Name: da-ilha-das-oncas-a-manaus
-  URL: http://localhost:9090/data/da-ilha-das-oncas-a-manaus
-  Zoom: 13
-  ZoomMin: 10
-  ZoomMax: 16
+  Name: porto-de-manaus
+  URL: http://localhost:9090/data/porto-de-manaus
+  Zoom: 14
+  ZoomMin: 11
+  ZoomMax: 17
   Range: 5
-  CenterLat: -3.19167
-  CenterLon: -59.78666
+  CenterLat: -59.995824813842795
+  CenterLon: -3.1250034254305574
+  Bounds:
+  - -60.053333299995785
+  - -3.3800162183825133
+  - -59.519981401802426
+  - -3.0033333047348374
   TilePixelSize: 128
   MapManager: {fileID: 0}
