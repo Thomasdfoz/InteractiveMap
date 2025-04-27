@@ -3,6 +3,7 @@ using UnityEngine.Pool;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.UI;
 
 /// <summary>
 /// Gerencia a criação, posicionamento e reciclagem de tiles dentro de um container.
@@ -50,7 +51,7 @@ public class TileManager : MonoBehaviour
         m_tilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(m_tilePrefab),
             actionOnGet: tile => tile.SetActive(true),
-            actionOnRelease: tile => tile.SetActive(false),
+            actionOnRelease: tile => tile.GetComponent<Image>().sprite = m_defaultSprite,
             actionOnDestroy: Destroy,
             collectionCheck: false,
             defaultCapacity: 100,
@@ -88,17 +89,17 @@ public class TileManager : MonoBehaviour
                 go.transform.SetParent(transform, false);
 
                 // Calcula a posição do tile em pixels globais
-                double tilePxX = x * m_mapManager.MapSettings.TilePixelSize;
-                double tilePxY = y * m_mapManager.MapSettings.TilePixelSize;
+                double half = m_mapManager.MapSettings.TilePixelSize * 0.5;
+                double tilePxX = x * m_mapManager.MapSettings.TilePixelSize + half;
+                double tilePxY = y * m_mapManager.MapSettings.TilePixelSize + half;
 
                 // Calcula o offset em relação ao centro em pixels
                 double offsetX = tilePxX - centerPx.x;
                 double offsetY = -(tilePxY - centerPx.y); // Inverte Y para o sistema de coordenadas do Unity
 
                 // Converte o offset para unidades do Unity
-                float scale = m_tileSize / (float)m_mapManager.MapSettings.TilePixelSize;
-                Vector2 position = new Vector2((float)offsetX * scale, (float)offsetY * scale);
-                go.transform.localPosition = new Vector3(position.x, position.y, 0);
+                double scale =  (double)m_tileSize / (double)m_mapManager.MapSettings.TilePixelSize;
+                go.transform.localPosition = new Vector3((float)(offsetX * scale), (float)(offsetY * scale), 0);
 
                 m_activeTiles[key] = go;
 
