@@ -80,23 +80,6 @@ Assets/
 - Suporte a **vários mapas** (global e náuticos) na mesma cena.  
 - **Marcadores (Pins)** posicionados via coordenadas geográficas.  
 
-## 🤝 Contribuição
-
-1. Fork este repositório.  
-2. Crie uma branch com sua feature:  
-   ```bash
-   git checkout -b feature/nova-feature
-   ```  
-3. Faça commit das suas mudanças:  
-   ```bash
-   git commit -m "Adiciona nova feature"
-   ```  
-4. Envie para o repositório remoto:  
-   ```bash
-   git push origin feature/nova-feature
-   ```  
-5. Abra um Pull Request.  
-
 ## 📄 Licença
 
 Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.  
