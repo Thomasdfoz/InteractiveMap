@@ -15,8 +15,6 @@ Siga os passos abaixo para adicionar o pacote diretamente pelo Git URL no Unity:
    ```
 5. Clique em **Add** e aguarde o pacote ser importado.
 
-> **Obs.:** Substitua `SEU_USUARIO/NOME_DO_REPOSITORIO` pela URL do seu repositório.
-
 ## ⚙️ Requisitos
 
 - Unity **2020.3** ou superior
