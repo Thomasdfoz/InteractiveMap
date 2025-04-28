@@ -23,7 +23,10 @@ namespace EGS.Core
         [SerializeField] private int m_initialZoom = 5;
         [SerializeField] private MapConfig m_mapGlobal;
         [SerializeField] private MapConfig[] m_maps;
-    
+
+        [SerializeField] double lonOffset = 0.1;
+        [SerializeField] double latOffset = 0.1;
+
         private PinManager m_pinManager;
         private double m_centerLon;
         private double m_centerLat;
@@ -96,11 +99,13 @@ namespace EGS.Core
     
                 // zoom dentro do intervalo?
                 bool inZoom = (Zoom >= map.ZoomMin && Zoom <= map.ZoomMax);
-    
+
                 // centro global dentro da caixa?
-                bool inBounds = CenterLon >= map.MinLon && CenterLon <= map.MaxLon
-                             && CenterLat >= map.MinLat && CenterLat <= map.MaxLat;
-    
+                bool inBounds = CenterLon >= (map.MinLon - lonOffset)
+                      && CenterLon <= (map.MaxLon + lonOffset)
+                      && CenterLat >= (map.MinLat - latOffset)
+                      && CenterLat <= (map.MaxLat + latOffset);
+
                 // só renderiza se zoom E bounds OK
                 if (inZoom && inBounds)
                     mgr.RenderMap();
