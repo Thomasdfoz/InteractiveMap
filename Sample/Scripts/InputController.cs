@@ -1,9 +1,10 @@
 ﻿using EGS.Core;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace EGS.Sample 
+namespace EGS.Sample
 {
     [DisallowMultipleComponent]
     public class InputController : MonoBehaviour
@@ -11,7 +12,9 @@ namespace EGS.Sample
         [SerializeField] private MapController mapController;
         [Header("→ Bloquear interações quando sobre essas layer")]
         [SerializeField] private LayerMask pinUiLayerMask;
+        [SerializeField] private Canvas canvasMap;
         private GameObject PinHandle;
+        private RectTransform pinHandleRectTransform;
         private bool pinning = false;
 
 
@@ -21,13 +24,36 @@ namespace EGS.Sample
                 return;
 
             float scroll = Input.GetAxis("Mouse ScrollWheel");
-
-            if (pinning && Input.GetMouseButtonDown(1))
+            if (pinning)
             {
-                pinning = false;
-                mapController.AddPin(Input.mousePosition, PinHandle);
-                PinHandle = null;
+                if (pinHandleRectTransform == null)
+                {
+                    GameObject go = Instantiate(PinHandle, canvasMap.transform);
+                    pinHandleRectTransform = go.GetComponent<RectTransform>();
+                    Canvas can = pinHandleRectTransform.AddComponent<Canvas>();
+                    can.overrideSorting = true;
+                    can.sortingOrder = 1000;
+                }
+
+                // Atualiza a posição do pinHandleRectTransform para seguir o mouse dentro do Canvas Overlay
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvasMap.transform as RectTransform,
+                    Input.mousePosition,
+                    canvasMap.worldCamera,
+                    out Vector2 localPoint
+                );
+
+                pinHandleRectTransform.anchoredPosition = localPoint;
+
+                if (Input.GetMouseButtonDown(1))
+                {
+                    pinning = false;
+                    mapController.AddPin(Input.mousePosition, PinHandle);
+                    Destroy(pinHandleRectTransform.gameObject);
+                    PinHandle = null;
+                }              
             }
+
             if (!Mathf.Approximately(scroll, 0f))
             {
                 mapController.Zoom(scroll);

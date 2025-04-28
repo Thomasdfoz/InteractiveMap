@@ -256,6 +256,7 @@ MonoBehaviour:
   pinUiLayerMask:
     serializedVersion: 2
     m_Bits: 32
+  canvasMap: {fileID: 564601655}
 --- !u!1 &1488723599
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,6 +331,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 34508b86b9f0be349a783a94cc7b93eb, type: 2}
   - {fileID: 11400000, guid: 334788bccc3ac804c98adab7a955c8c8, type: 2}
   - {fileID: 11400000, guid: ee441dd6b8a2d894c8004fd3ce85a6c6, type: 2}
+  lonOffset: 0.1
+  latOffset: 0.1
 --- !u!114 &1488723605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,78 +543,6 @@ PrefabInstance:
       propertyPath: m_inputController
       value: 
       objectReference: {fileID: 1461875014}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 904549073071979683, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1314601855826415647, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_ContentType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1314601855826415647, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_KeyboardType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1314601855826415647, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_CharacterValidation
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1700583684486589066, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_ContentType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1700583684486589066, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_KeyboardType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1700583684486589066, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_CharacterValidation
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2941652327244263343, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3067610259127073346, guid: 90927a2f92058d248853299862681c2f, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -696,34 +627,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas UI Sample
       objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6940723230706862844, guid: 90927a2f92058d248853299862681c2f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7482168927873803662, guid: 90927a2f92058d248853299862681c2f, type: 3}
       propertyPath: inputController
       value: 
       objectReference: {fileID: 1461875014}
+    - target: {fileID: 7708095490118064480, guid: 90927a2f92058d248853299862681c2f, type: 3}
+      propertyPath: m_globalManager
+      value: 
+      objectReference: {fileID: 1488723604}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
