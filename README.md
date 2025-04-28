@@ -88,7 +88,7 @@ Siga os passos abaixo para adicionar o pacote diretamente pelo Git URL no Unity:
 1. Execute a cena que contenha todos os scripts descritos acima.
 2. Utilize a roda do mouse para dar **zoom** (centrado na posição do cursor).
 3. Clique e arraste para **pan**.
-4. Para adicionar um pin, clique em algum do canto inferior e clique com o botao direito no mapa; um marcador será adicionado na coordenada clicada.
+4. Para adicionar um pin, clique em algum pin da ui e clique com o botao direito no mapa; um marcador será adicionado na coordenada clicada.
 
 ## 📂 Estrutura do Projeto
 
