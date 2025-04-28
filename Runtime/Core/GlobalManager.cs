@@ -9,18 +9,18 @@ namespace EGS.Core
     public class GlobalManager : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField, Tooltip("Canvas que conter� o mapa")] private Canvas m_canvas;
+        [SerializeField, Tooltip("Canvas que conter� o mapa")] private Canvas m_canvasMap;
         [SerializeField, Tooltip("Prefab do tile")] private GameObject m_tilePrefab;
         [SerializeField, Tooltip("Componente de download de tiles")] private TileDownloader m_downloader;
         [SerializeField, Tooltip("Componente de InputController para zoom/pan")] private MapController m_mapController;
         [SerializeField, Tooltip("Texture padrao para preencher os tiles que n�o possuem textura do servidor")] private Texture2D m_defaultTexture;
-    
+
         [Header("Map Settings")]
         [SerializeField, Tooltip("Tamanho do tile em pixels")] private int m_tileSize;
         [SerializeField] private RectTransform m_centerReference;
         [SerializeField] private double m_initialLat = -3.1f;
         [SerializeField] private double m_initialLon = -60.2f;
-        [SerializeField] private int m_initialZoom = 5;
+        [SerializeField] private int m_initialZoom = 6;
         [SerializeField] double lonOffset = 0.5;
         [SerializeField] double latOffset = 0.5;
         [SerializeField] private MapConfig m_mapGlobal;
@@ -31,52 +31,55 @@ namespace EGS.Core
         private double m_centerLon;
         private double m_centerLat;
         private float m_zoom;
-    
+
         /// <summary>
         /// Zoom atual do mapa.
         /// </summary>
         public float Zoom { get => m_zoom; set => m_zoom = value; }
-    
+
         /// <summary>
         /// Latitude central do mapa.
         /// </summary>
         public double CenterLat { get => m_centerLat; set => m_centerLat = value; }
-    
+
         /// <summary>
         /// Longitude central do mapa.
         /// </summary>
         public double CenterLon { get => m_centerLon; set => m_centerLon = value; }
-    
-        public Transform MapGlobalContentTransform => m_mapGlobal.MapManager.MapContent.transform;
+
+        public Transform MapGlobalContentTransform { get; private set; }
         public RectTransform CenterReference { get => m_centerReference; }
-    
+
         public int TilePixelSize => m_mapGlobal.TilePixelSize;
         public int TileSize => m_tileSize;
-    
-    
+
+
         private IEnumerator Start()
         {
             m_centerLat = m_initialLat;
             m_centerLon = m_initialLon;
             m_zoom = m_initialZoom;
-    
+
             CreateBackground();
-    
-            m_mapGlobal.MapManager = CreateMapContent(m_mapGlobal.name, m_canvas.transform, 1);
+
+            m_mapGlobal.MapManager = CreateMapContent(m_mapGlobal.name, m_canvasMap.transform, 1);
+
+
             yield return m_mapGlobal.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
-    
+
+            MapGlobalContentTransform = m_mapGlobal.MapManager.MapContent.transform;
             m_pinManager = m_mapGlobal.MapManager.gameObject.AddComponent<PinManager>();
             m_pinManager.Initialize(this);
-    
+
             foreach (var map in m_maps)
             {
                 map.MapManager = CreateMapContent(map.name, MapGlobalContentTransform, 10);
                 AddPin(map.MapManager.gameObject, map.CenterLat, CenterLon);
                 yield return map.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
             }
-    
+
             RenderMap();
-    
+
             m_mapController.Initialize(this);
         }
         /// <summary>
@@ -86,17 +89,17 @@ namespace EGS.Core
         {
             m_pinManager.AddPin(pinPrefab, lat, lon, sortOrder);
         }
-    
+
         public void RenderMap()
         {
             // 1) renderiza global
             m_mapGlobal.MapManager.RenderMap();
-    
+
             // 3) percorre cada mapa náutico
             foreach (var map in m_maps)
             {
                 var mgr = map.MapManager;
-    
+
                 // zoom dentro do intervalo?
                 bool inZoom = (Zoom >= map.ZoomMin && Zoom <= map.ZoomMax);
 
@@ -112,11 +115,11 @@ namespace EGS.Core
                 else
                     mgr.ReleaseMap();
             }
-    
+
             // 4) atualiza pins (caso eles dependam de todos os mapas)
             m_pinManager.UpdateAllPins();
         }
-    
+
         private MapManager CreateMapContent(string name, Transform parent, int sortOrder)
         {
             GameObject bgGO = new GameObject(name);
@@ -130,7 +133,7 @@ namespace EGS.Core
             rt.anchorMax = Vector2.one;
             rt.offsetMin = new Vector2(-500, -500);
             rt.offsetMax = new Vector2(500, 500);
-    
+
             return mapManager;
         }
         private void CreateBackground()
@@ -139,7 +142,7 @@ namespace EGS.Core
             Image img = bgGO.AddComponent<Image>();
             Sprite sprite = Sprite.Create(m_defaultTexture, new Rect(0, 0, m_defaultTexture.width, m_defaultTexture.height), new Vector2(0.5f, 0.5f), 100);
             img.sprite = sprite;
-            img.transform.SetParent(m_canvas.transform, false);
+            img.transform.SetParent(m_canvasMap.transform, false);
             RectTransform rt = img.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;

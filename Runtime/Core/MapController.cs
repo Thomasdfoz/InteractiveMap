@@ -7,7 +7,7 @@ namespace EGS.Core
     public class MapController : MonoBehaviour
     {
         [Header("Zoom Limits")]
-        [SerializeField] private int zoomMin = 4;
+        [SerializeField] private int zoomMin = 5;
         [SerializeField] private int zoomMax = 18;
 
         [Header("Pan Sensitivity")]
