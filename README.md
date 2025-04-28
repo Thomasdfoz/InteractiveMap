@@ -11,7 +11,7 @@ Siga os passos abaixo para adicionar o pacote diretamente pelo Git URL no Unity:
 3. Clique no botão **+** no canto superior esquerdo e selecione **Add package from Git URL...**.  
 4. Cole a URL do repositório Git:
    ```text
-  https://github.com/Thomasdfoz/InteractiveMap.git
+  [https://github.com/Thomasdfoz/InteractiveMap.git]
    ```
 5. Clique em **Add** e aguarde o pacote ser importado.
 
