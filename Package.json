@@ -1,1 +1,21 @@
-{"name":"com.egs.interactivemap","version":"0.0.1","displayName":"InteractiveMap","description":"...","unity":"2020.3","unityRelease":"8f1","author":{"name":"EGS","email":"eletronicgamesstudio@gmail.com","url":""},"type":"tools"}
+{
+  "name": "com.egs.interactivemap",
+  "version": "0.0.1",
+  "displayName": "InteractiveMap",
+  "description": "...",
+  "unity": "2020.3",
+  "unityRelease": "8f1",
+  "author": {
+    "name": "EGS",
+    "email": "eletronicgamesstudio@gmail.com",
+    "url": ""
+  },
+  "type": "tools",
+  "samples": [
+    {
+      "displayName": "Interactive Map Sample",
+      "description": "Cenas de exemplo, prefabs e scripts para começar",
+      "path": "Sample~"
+    }
+  ]
+}

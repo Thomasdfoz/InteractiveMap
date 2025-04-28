@@ -21,11 +21,11 @@ namespace EGS.Core
         [SerializeField] private double m_initialLat = -3.1f;
         [SerializeField] private double m_initialLon = -60.2f;
         [SerializeField] private int m_initialZoom = 5;
+        [SerializeField] double lonOffset = 0.5;
+        [SerializeField] double latOffset = 0.5;
         [SerializeField] private MapConfig m_mapGlobal;
         [SerializeField] private MapConfig[] m_maps;
 
-        [SerializeField] double lonOffset = 0.1;
-        [SerializeField] double latOffset = 0.1;
 
         private PinManager m_pinManager;
         private double m_centerLon;
