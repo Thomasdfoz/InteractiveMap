@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 582939fe5e2ab8449bce86b0ba5ae71c, type: 3}
-  m_Name: baia-de-sao-marcos
+  m_Name: MapConfig
   m_EditorClassIdentifier: 
-  Name: baia-de-sao-marcos
-  URL: http://localhost:9090/data/baia-de-sao-marcos
-  ZoomMin: 11
-  ZoomMax: 17
-  Range: 5
-  TilePixelSize: 128
-  Zoom: 14
-  CenterLat: -2.4958354738668387
-  CenterLon: -44.31666793668823
-  MinLon: -44.43333330000001
-  MaxLon: -44.200002573376466
-  MinLat: -2.591670955302198
-  MaxLat: -2.399999992431479
+  Name: 
+  URL: 
+  ZoomMin: 0
+  ZoomMax: 0
+  Range: 0
+  TilePixelSize: 0
+  Zoom: 0
+  CenterLat: 0
+  CenterLon: 0
+  MinLon: 0
+  MaxLon: 0
+  MinLat: 0
+  MaxLat: 0
   MapManager: {fileID: 0}
