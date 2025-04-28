@@ -28,7 +28,7 @@ Siga os passos abaixo para adicionar o pacote diretamente pelo Git URL no Unity:
 
 1. **Canvas para o mapa**
 
-   - Crie um _Canvas_ com _UI Scale Mode_ em **Constant Pixel Size** (tamanho de referência 1–100).
+   - Crie um _Canvas_ com _UI Scale Mode_ em **Constant Pixel Size** (1/100).
    - Ou use o prefab de exemplo **Canvas Map Sample**.
 
 2. **RawImage para tiles**
