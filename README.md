@@ -10,10 +10,10 @@ Siga os passos abaixo para adicionar o pacote diretamente pelo Git URL no Unity:
 2. No menu superior, vá em **Window > Package Manager**.  
 3. Clique no botão **+** no canto superior esquerdo e selecione **Add package from Git URL...**.  
 4. Cole a URL do repositório Git:
-   ```text
-   https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
-   ```
-5. Clique em **Add** e aguarde o pacote ser importado.
+   
+  https://github.com/Thomasdfoz/InteractiveMap.git
+   
+6. Clique em **Add** e aguarde o pacote ser importado.
 
 > **Obs.:** Substitua `SEU_USUARIO/NOME_DO_REPOSITORIO` pela URL do seu repositório.
 
@@ -79,23 +79,6 @@ Assets/
 - **Cache** de objetos de tile via `ObjectPool` para performance.  
 - Suporte a **vários mapas** (global e náuticos) na mesma cena.  
 - **Marcadores (Pins)** posicionados via coordenadas geográficas.  
-
-## 🤝 Contribuição
-
-1. Fork este repositório.  
-2. Crie uma branch com sua feature:  
-   ```bash
-   git checkout -b feature/nova-feature
-   ```  
-3. Faça commit das suas mudanças:  
-   ```bash
-   git commit -m "Adiciona nova feature"
-   ```  
-4. Envie para o repositório remoto:  
-   ```bash
-   git push origin feature/nova-feature
-   ```  
-5. Abra um Pull Request.  
 
 ## 📄 Licença
 
