@@ -6,7 +6,7 @@ namespace EGS.Core
 {
     public class MapController : MonoBehaviour
     {
-        [Header("Zoom Limits")]
+        [Header("ZoomMouse Limits")]
         [SerializeField] private int zoomMin = 5;
         [SerializeField] private int zoomMax = 18;
 
@@ -25,11 +25,15 @@ namespace EGS.Core
         {
             m_globalManager = globalManager;
             m_mapContent = m_globalManager.MapGlobalContentTransform.GetComponent<RectTransform>();
-            Initialized = true;
+
+            if (m_globalManager.IsFinish)
+                Initialized = true;
         }
 
-        public void Zoom(float value)
+        public void ZoomMouse(float value)
         {
+            if (!Initialized) return;
+
             if (Mathf.Approximately(value, 0f)) return;
 
             // 1) Sincroniza o pan atual
@@ -85,13 +89,26 @@ namespace EGS.Core
             m_globalManager.RenderMap();
         }
 
+        public void Zoom(float value)
+        {
+            if (!Initialized) return;
+
+            m_globalManager.Zoom = value;
+            UpdateCenterByVisualReference();
+            m_globalManager.RenderMap();
+        }
+
         public void PanDwon(Vector3 mousePos)
         {
+            if (!Initialized) return;
+
             lastMousePosition = mousePos;
         }
 
         public void PanMove(Vector3 mousePos)
         {
+            if (!Initialized) return;
+
             Vector2 delta = (Vector2)(mousePos - lastMousePosition);
             m_panOffset += delta;
             m_mapContent.anchoredPosition = m_panOffset;
@@ -100,6 +117,8 @@ namespace EGS.Core
 
         public void PanUp()
         {
+            if (!Initialized) return;
+
             // só re-renderiza se o pan visual foi maior que o threshold
             if (m_panOffset.magnitude >= panThreshold)
             {
@@ -115,6 +134,8 @@ namespace EGS.Core
 
         private void UpdateCenterByVisualReference()
         {
+            if (!Initialized) return;
+
             Vector2 localCenter = m_globalManager.CenterReference.anchoredPosition;
             Vector2 mapOffset = localCenter - m_mapContent.anchoredPosition;
 
@@ -146,6 +167,8 @@ namespace EGS.Core
 
         public void AddPin(Vector2 position, GameObject pinPrefab)
         {
+            if (!Initialized) return;
+
             Vector2 mouseCanvasPos = position;
             Vector2 centerPx = MapUtils.LatLonToPixels(
                 m_globalManager.CenterLat,
@@ -165,8 +188,21 @@ namespace EGS.Core
 
         public void FlyTo(double lat, double lon)
         {
+            if (!Initialized) return;
+
             m_globalManager.CenterLat = lat;
             m_globalManager.CenterLon = lon;
+            UpdateCenterByVisualReference();
+            m_globalManager.RenderMap();
+        }
+
+        public void FlyTo(double lat, double lon, float zoom)
+        {
+            if (!Initialized) return;
+
+            m_globalManager.CenterLat = lat;
+            m_globalManager.CenterLon = lon;
+            m_globalManager.Zoom = zoom;
             UpdateCenterByVisualReference();
             m_globalManager.RenderMap();
         }

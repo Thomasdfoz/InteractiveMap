@@ -23,7 +23,7 @@ namespace EGS.Core
         private readonly Dictionary<string, GameObject> m_activeTiles = new Dictionary<string, GameObject>();
     
         /// <summary>
-        /// Zoom atual do mapa.
+        /// ZoomMouse atual do mapa.
         /// </summary>
         public float Zoom { get; set; }
     

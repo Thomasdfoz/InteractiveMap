@@ -31,9 +31,10 @@ namespace EGS.Core
         private double m_centerLon;
         private double m_centerLat;
         private float m_zoom;
+        private bool m_isFinish;
 
         /// <summary>
-        /// Zoom atual do mapa.
+        /// ZoomMouse atual do mapa.
         /// </summary>
         public float Zoom { get => m_zoom; set => m_zoom = value; }
 
@@ -52,7 +53,7 @@ namespace EGS.Core
 
         public int TilePixelSize => m_mapGlobal.TilePixelSize;
         public int TileSize => m_tileSize;
-
+        public bool IsFinish { get => m_isFinish; }
 
         private IEnumerator Start()
         {
@@ -67,6 +68,8 @@ namespace EGS.Core
 
             yield return m_mapGlobal.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
 
+            if (!m_mapGlobal.MapManager.IsFinish) yield break;
+
             MapGlobalContentTransform = m_mapGlobal.MapManager.MapContent.transform;
             m_pinManager = m_mapGlobal.MapManager.gameObject.AddComponent<PinManager>();
             m_pinManager.Initialize(this);
@@ -75,12 +78,14 @@ namespace EGS.Core
             {
                 map.MapManager = CreateMapContent(map.name, MapGlobalContentTransform, 10);
                 AddPin(map.MapManager.gameObject, map.CenterLat, CenterLon);
-                yield return map.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
+                yield return map.MapManager. Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
             }
 
             RenderMap();
 
             m_mapController.Initialize(this);
+
+            m_isFinish = true;
         }
         /// <summary>
         /// Adiciona um pin no mapa com coordenadas específicas.

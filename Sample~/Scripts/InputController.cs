@@ -56,7 +56,7 @@ namespace EGS.Sample
 
             if (!Mathf.Approximately(scroll, 0f))
             {
-                mapController.Zoom(scroll);
+                mapController.ZoomMouse(scroll);
             }
             if (Input.GetMouseButtonDown(0))
             {

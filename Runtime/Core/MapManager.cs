@@ -16,13 +16,15 @@ namespace EGS.Core
         private GameObject m_mapContent;
         private MapConfig mapSettings;
         private GlobalManager m_globalManager;
-    
+        private bool m_isFinish;
+
         /// <summary>
         /// Raio de tiles.
         /// </summary>
         public GameObject MapContent { get => m_mapContent; }
         public MapConfig MapSettings { get => mapSettings; }
-    
+        public bool IsFinish { get => m_isFinish; }
+
         public IEnumerator Initialize( GlobalManager globalManager, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
         {
             m_globalManager = globalManager;
@@ -73,6 +75,7 @@ namespace EGS.Core
             m_tileManager.CenterLat = mapSettings.CenterLat;
             m_tileManager.CenterLon = mapSettings.CenterLon;
             m_tileManager.Range = mapSettings.Range;
+            m_isFinish = true;
         }
     
         public void ReleaseMap()
