@@ -19,7 +19,7 @@ namespace EGS.Core
         private Vector3 lastMousePosition;
         private Vector2 m_panOffset;
 
-        public bool Initialized { get; private set; }
+        public bool Initialized { get; private set; } = true;
 
         public void Initialize(GlobalManager globalManager)
         {
@@ -119,17 +119,46 @@ namespace EGS.Core
         {
             if (!Initialized) return;
 
-            // só re-renderiza se o pan visual foi maior que o threshold
+            // Só reagimos se realmente houve pan considerável
             if (m_panOffset.magnitude >= panThreshold)
             {
-                UpdateCenterByVisualReference();
+                // 1) Calcula o deslocamento visual real em pixels de mapa usando o CenterReference
+                Vector2 localCenter = m_globalManager.CenterReference.anchoredPosition;      // ponto fixo no meio da tela :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+                Vector2 mapOffset = localCenter - m_mapContent.anchoredPosition;         // quanto o container foi movido
+                float scale = m_globalManager.TileSize / (float)m_globalManager.TilePixelSize;
+
+                // Converte UI-pixels → “map-pixels” e inverte Y para o sistema de tiles
+                Vector2 offsetPx = new Vector2(
+                  mapOffset.x / scale,
+                 -mapOffset.y / scale
+                );
+
+                // 2) Puxa o centro antigo em pixels globais
+                Vector2 centerPx = MapUtils.LatLonToPixels(
+                  m_globalManager.CenterLat,
+                  m_globalManager.CenterLon,
+                  m_globalManager.Zoom,
+                  m_globalManager.TilePixelSize
+                );
+
+                // 3) Ajusta para onde realmente está o cursor/centro visual
+                Vector2 newCenterPx = centerPx + offsetPx;
+                Vector2 newLatLon = MapUtils.PixelsToLatLon(
+                  newCenterPx,
+                  m_globalManager.Zoom,
+                  m_globalManager.TilePixelSize
+                );
+
+                // 4) Atualiza o centro lógico e reseta o pan visual
+                m_globalManager.CenterLat = newLatLon.x;
+                m_globalManager.CenterLon = newLatLon.y;
+
+                m_panOffset = Vector2.zero;
+                m_mapContent.anchoredPosition = Vector2.zero;
+
+                // 5) Re-renderiza incremental com o novo centro
                 m_globalManager.RenderMap();
             }
-
-            // limpa sempre o deslocamento visual
-            m_panOffset = Vector2.zero;
-            m_mapContent.anchoredPosition = Vector2.zero;
-
         }
 
         private void UpdateCenterByVisualReference()
@@ -160,9 +189,6 @@ namespace EGS.Core
             m_globalManager.CenterLat = newLatLon.x;
             m_globalManager.CenterLon = newLatLon.y;
 
-            // —————— Limpa o deslocamento visual do pan ——————
-            m_panOffset = Vector2.zero;
-            m_mapContent.anchoredPosition = Vector2.zero;
         }
 
         public void AddPin(Vector2 position, GameObject pinPrefab)

@@ -83,9 +83,9 @@ namespace EGS.Core
 
             RenderMap();
 
-            m_mapController.Initialize(this);
-
             m_isFinish = true;
+
+            m_mapController.Initialize(this);
         }
         /// <summary>
         /// Adiciona um pin no mapa com coordenadas específicas.
