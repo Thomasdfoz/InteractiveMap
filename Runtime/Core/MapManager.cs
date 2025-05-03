@@ -42,7 +42,7 @@ namespace EGS.Core
     
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError($"Erro ao carregar Map JSON: {www.error}");
+                Debug.LogError($"Erro ao carregar Map: {www.error}");
                 yield break;
             }
     
