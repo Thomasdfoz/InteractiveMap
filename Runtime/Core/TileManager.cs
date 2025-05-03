@@ -147,7 +147,8 @@ namespace EGS.Core
                                     tex =>
                                     {
                                         if (tex != null)
-                                            m_textureCache[key] = tex;
+                                            m_textureCache[key] = tex;                                       
+                                         
 
                                         // só aplica se:
                                         // 1) essa chave ainda estiver visível
