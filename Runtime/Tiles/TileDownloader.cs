@@ -8,7 +8,7 @@ namespace EGS.Tile
     public class TileDownloader : MonoBehaviour
     {
         //[SerializeField] private string tileURL= "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
-        [Tooltip("URL parcial do mapa ex: 'da-ilha-das-oncas-a-manaus'")]
+        //[Tooltip("URL parcial do mapa ex: 'da-ilha-das-oncas-a-manaus'")]
         //[SerializeField] private string tileURL;
     
         private int maxConcurrentDownloads = 10;
