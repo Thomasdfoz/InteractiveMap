@@ -15,6 +15,10 @@ namespace EGS.Tile
                 _image.texture = text;
                
             }
+            else
+            {
+               gameObject.SetActive(false);
+            }
         }
     }
 }
