@@ -33,6 +33,9 @@ namespace EGS.Core
         public void ZoomMouse(float value)
         {
             if (!Initialized) return;
+            
+            //if (!m_globalManager.AllDownloadsComplete())
+            //    return;
 
             if (Mathf.Approximately(value, 0f)) return;
 

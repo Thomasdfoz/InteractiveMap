@@ -25,6 +25,9 @@ namespace EGS.Core
         public MapConfig MapSettings { get => mapSettings; }
         public bool IsFinish { get => m_isFinish; }
 
+        public bool AllDownloadsComplete => m_tileManager.AllDownloadsComplete;
+
+
         public IEnumerator Initialize( GlobalManager globalManager, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
         {
             m_globalManager = globalManager;

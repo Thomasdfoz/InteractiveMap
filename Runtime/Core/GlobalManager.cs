@@ -53,7 +53,21 @@ namespace EGS.Core
         public MapConfig[] Maps => m_maps;
         public int TilePixelSize => m_mapGlobal.TilePixelSize;
         public int TileSize => m_tileSize;
-        public bool IsFinish => m_isFinish; 
+        public bool IsFinish => m_isFinish;
+
+        public bool AllDownloadsComplete()
+        {
+            if (!m_mapGlobal.MapManager.AllDownloadsComplete)
+                return false;
+
+            foreach (var map in m_maps)
+            {
+                if (!map.MapManager.AllDownloadsComplete)
+                    return false;
+            }
+
+            return true;
+        }
 
         private IEnumerator Start()
         {
