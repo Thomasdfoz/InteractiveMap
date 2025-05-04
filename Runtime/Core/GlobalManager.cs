@@ -49,11 +49,11 @@ namespace EGS.Core
         public double CenterLon { get => m_centerLon; set => m_centerLon = value; }
 
         public Transform MapGlobalContentTransform { get; private set; }
-        public RectTransform CenterReference { get => m_centerReference; }
-
+        public RectTransform CenterReference => m_centerReference; 
+        public MapConfig[] Maps => m_maps;
         public int TilePixelSize => m_mapGlobal.TilePixelSize;
         public int TileSize => m_tileSize;
-        public bool IsFinish { get => m_isFinish; }
+        public bool IsFinish => m_isFinish; 
 
         private IEnumerator Start()
         {
