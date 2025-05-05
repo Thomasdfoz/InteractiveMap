@@ -29,7 +29,7 @@ namespace EGS.Core
         public bool AllDownloadsComplete => m_tileManager.AllDownloadsComplete;
 
 
-        public IEnumerator Initialize(GlobalManager globalManager, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
+        public IEnumerator Initialize(GlobalManager globalManager, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
         {
             m_globalManager = globalManager;
             mapSettings = settings;
@@ -38,7 +38,7 @@ namespace EGS.Core
             yield return FetchConfigAndSetup(settings.URL, tilePrefab, tileSize, defaultTexture, downloader);
         }
         
-        private IEnumerator FetchConfigAndSetup(string url, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader)
+        private IEnumerator FetchConfigAndSetup(string url, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader)
         {
             // Monta a URL completa (adicione .json se necess�rio)
             using var www = UnityWebRequest.Get($"{url}.json");

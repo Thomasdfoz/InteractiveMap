@@ -23,14 +23,14 @@ namespace EGS.Core
         [Tooltip("Quantos níveis de zoom acima/abaixo devem ser pré-carregados.")]
         [SerializeField] private int zoomBuffer = 2;
 
-        private GameObject m_tilePrefab;
+        private TileRenderer m_tilePrefab;
         private int m_tileSize;
         private TileDownloader m_tileDownloader;
         private MapManager m_mapManager;
-        private ObjectPool<GameObject> m_tilePool;
+        private ObjectPool<TileRenderer> m_tilePool;
 
         // Tiles ativos na cena (key -> GameObject)
-        private readonly Dictionary<string, GameObject> m_activeTiles = new Dictionary<string, GameObject>();
+        private readonly Dictionary<string, TileRenderer> m_activeTiles = new Dictionary<string, TileRenderer>();
         // Cache de texturas baixadas (key -> Texture2D)
         private readonly Dictionary<string, Texture2D> m_textureCache = new Dictionary<string, Texture2D>();
         // Conjunto de chaves visíveis no frame anterior (para zoom atual)
@@ -56,31 +56,26 @@ namespace EGS.Core
         /// <summary>
         /// Inicializa o TileManager com prefab, tamanho, textura default e serviço de tiles.
         /// </summary>
-        public void Initialize(
-            MapManager mapManager,
-            GameObject tilePrefab,
-            int tileSize,
-            Texture2D defaultTexture,
-            TileDownloader tileDownloader)
+        public void Initialize(MapManager mapManager,TileRenderer tilePrefab,int tileSize,Texture2D defaultTexture,TileDownloader tileDownloader)
         {
             m_tilePrefab = tilePrefab;
             m_tileSize = tileSize;
             m_tileDownloader = tileDownloader;
             m_mapManager = mapManager;
 
-            m_tilePool = new ObjectPool<GameObject>(
+            m_tilePool = new ObjectPool<TileRenderer>(
                 createFunc: () => Instantiate(m_tilePrefab),
                 actionOnGet: tile =>
                 {
                     var img = tile.GetComponent<RawImage>();
                     if (img != null) img.texture = defaultTexture;
-                    tile.SetActive(true);
+                    tile.gameObject.SetActive(true);
                 },
-                actionOnRelease: tile => tile.SetActive(false),
+                actionOnRelease: tile => tile.gameObject.SetActive(false),
                 actionOnDestroy: Destroy,
                 collectionCheck: false,
-                defaultCapacity: 100,
-                maxSize: 500
+                defaultCapacity: 50,
+                maxSize: 200
             );
         }
 
@@ -129,7 +124,7 @@ namespace EGS.Core
                 else
                 {
                     // Instancia novo tile
-                    GameObject go = m_tilePool.Get();
+                    TileRenderer go = m_tilePool.Get();
                     go.transform.SetParent(transform, false);
                     go.transform.localPosition = localPos;
                     m_activeTiles[key] = go;
@@ -253,10 +248,10 @@ namespace EGS.Core
         /// <summary>
         /// Aplica textura baixada no RawImage do TileRenderer.
         /// </summary>
-        private void ApplyTexture(GameObject go, Texture2D tex)
+        private void ApplyTexture(TileRenderer go, Texture2D tex)
         {
             if (tex == null) return;
-            go.GetComponent<TileRenderer>()?.SetTile(tex);
+            go.SetTile(tex);
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ namespace EGS.Core
     {
         [Header("References")]
         [SerializeField, Tooltip("Canvas que conter� o mapa")] private Canvas m_canvasMap;
-        [SerializeField, Tooltip("Prefab do tile")] private GameObject m_tilePrefab;
+        [SerializeField, Tooltip("Prefab do tile")] private TileRenderer m_tilePrefab;
         [SerializeField, Tooltip("Componente de download de tiles")] private TileDownloader m_downloader;
         [SerializeField, Tooltip("Componente de InputController para zoom/pan")] private MapController m_mapController;
         [SerializeField, Tooltip("Texture padrao para preencher os tiles que n�o possuem textura do servidor")] private Texture2D m_defaultTexture;
