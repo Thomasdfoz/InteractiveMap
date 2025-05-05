@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EGS.Tile;
 using EGS.Util;
+using PlasticPipe.PlasticProtocol.Messages;
 
 namespace EGS.Core
 {
@@ -69,7 +70,7 @@ namespace EGS.Core
                 {
                     var img = tile.GetComponent<RawImage>();
                     if (img != null) img.texture = defaultTexture;
-                    tile.gameObject.SetActive(true);
+                    tile.gameObject.SetActive(false);
                 },
                 actionOnRelease: tile => tile.gameObject.SetActive(false),
                 actionOnDestroy: Destroy,
@@ -148,7 +149,7 @@ namespace EGS.Core
                                     if (tex != null)
                                         m_textureCache[key] = tex;
                                     if (m_activeTiles.ContainsKey(key))
-                                        go.GetComponent<TileRenderer>()?.SetTile(tex);
+                                        ApplyTexture(go, tex);
                                     m_pendingDownloads--;
                                 }
                             )
@@ -251,7 +252,10 @@ namespace EGS.Core
         private void ApplyTexture(TileRenderer go, Texture2D tex)
         {
             if (tex == null) return;
+
             go.SetTile(tex);
+            go.gameObject.SetActive(true);
+
         }
 
         /// <summary>
