@@ -22,6 +22,11 @@ namespace EGS.Data
         public double MaxLon;
         public double MinLat;
         public double MaxLat;
+        [Header("Cache & Performance")]
+        [Tooltip("Quantos tiles além do Range devem ser mantidos carregados para evitar áreas brancas.")]
+        [SerializeField] public int BufferMargin;
+        [Tooltip("Quantos níveis de zoom acima/abaixo devem ser pré-carregados.")]
+        [SerializeField] public int ZoomBuffer;
         [HideInInspector] public MapManager MapManager;
     }
 }

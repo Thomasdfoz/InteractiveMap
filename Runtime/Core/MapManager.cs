@@ -17,7 +17,8 @@ namespace EGS.Core
         private MapConfig mapSettings;
         private GlobalManager m_globalManager;
         private bool m_isFinish;
-
+        private int m_zoomBuffer;
+        private int m_bufferMargin;
         /// <summary>
         /// Raio de tiles.
         /// </summary>
@@ -28,7 +29,7 @@ namespace EGS.Core
         public bool AllDownloadsComplete => m_tileManager.AllDownloadsComplete;
 
 
-        public IEnumerator Initialize( GlobalManager globalManager, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
+        public IEnumerator Initialize(GlobalManager globalManager, GameObject tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
         {
             m_globalManager = globalManager;
             mapSettings = settings;
@@ -66,12 +67,7 @@ namespace EGS.Core
             // 3) Agora que MapConfig est� completo, cria o container + TileManager
             m_mapContent = CreateMapContainer(transform);
             m_tileManager = m_mapContent.gameObject.AddComponent<TileManager>();
-            m_tileManager.Initialize(
-                this,
-                tilePrefab,
-                tileSize,
-                defaultTexture,
-                downloader);
+            m_tileManager.Initialize(this, tilePrefab, tileSize, defaultTexture, downloader);
     
             // Ajusta os valores iniciais
             m_tileManager.Zoom = mapSettings.Zoom;

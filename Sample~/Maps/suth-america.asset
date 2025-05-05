@@ -16,7 +16,7 @@ MonoBehaviour:
   URL: http://localhost:8080/styles/maptiler-basic
   ZoomMin: 0
   ZoomMax: 20
-  Range: 10
+  Range: 5
   TilePixelSize: 256
   Zoom: 2
   CenterLat: 0

@@ -26,6 +26,8 @@ namespace EGS.Core
         [SerializeField] private MapConfig m_mapGlobal;
         [SerializeField] private MapConfig[] m_maps;
 
+        
+
 
         private PinManager m_pinManager;
         private double m_centerLon;
