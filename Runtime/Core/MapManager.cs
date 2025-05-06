@@ -1,5 +1,6 @@
 using EGS.Data;
 using EGS.Tile;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,8 +18,6 @@ namespace EGS.Core
         private MapConfig mapSettings;
         private GlobalManager m_globalManager;
         private bool m_isFinish;
-        private int m_zoomBuffer;
-        private int m_bufferMargin;
         /// <summary>
         /// Raio de tiles.
         /// </summary>
@@ -29,16 +28,16 @@ namespace EGS.Core
         public bool AllDownloadsComplete => m_tileManager.AllDownloadsComplete;
 
 
-        public IEnumerator Initialize(GlobalManager globalManager, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader, MapConfig settings)
+        public IEnumerator Initialize(GlobalManager globalManager, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture, MapConfig settings)
         {
             m_globalManager = globalManager;
             mapSettings = settings;
     
             // Inicia coroutine que vai buscar o JSON e s� depois cria o TileManager
-            yield return FetchConfigAndSetup(settings.URL, tilePrefab, tileSize, defaultTexture, downloader);
+            yield return FetchConfigAndSetup(settings.URL, tilePrefab, tileSize, defaultTexture);
         }
         
-        private IEnumerator FetchConfigAndSetup(string url, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture, TileDownloader downloader)
+        private IEnumerator FetchConfigAndSetup(string url, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture)
         {
             // Monta a URL completa (adicione .json se necess�rio)
             using var www = UnityWebRequest.Get($"{url}.json");
@@ -67,7 +66,7 @@ namespace EGS.Core
             // 3) Agora que MapConfig est� completo, cria o container + TileManager
             m_mapContent = CreateMapContainer(transform);
             m_tileManager = m_mapContent.gameObject.AddComponent<TileManager>();
-            m_tileManager.Initialize(this, tilePrefab, tileSize, defaultTexture, downloader);
+            m_tileManager.Initialize(this, tilePrefab, tileSize, defaultTexture);
     
             // Ajusta os valores iniciais
             m_tileManager.Zoom = mapSettings.Zoom;
@@ -81,15 +80,28 @@ namespace EGS.Core
         {
             m_tileManager.ReleaseAll();
         }
+
+        public void RegisterEventOnZoomRenderingFinish(Action action)
+        {
+            m_tileManager.OnZoomRenderingFinish += action;
+        }
+
         /// <summary>
         /// Renderiza o mapa com configura��es atuais.
         /// </summary>
-        public void RenderMap()
+        public void RenderMap(bool withZoom = false)
         {
-            m_tileManager.Zoom = m_globalManager.Zoom;
             m_tileManager.CenterLat = m_globalManager.CenterLat;
             m_tileManager.CenterLon = m_globalManager.CenterLon;
             m_tileManager.Range = mapSettings.Range;
+
+            if (withZoom)
+            {             
+                m_tileManager.Zoom = m_globalManager.Zoom;
+                m_tileManager.RenderBatchZoom();
+                return;
+            }
+
             m_tileManager.Render();
         }
        

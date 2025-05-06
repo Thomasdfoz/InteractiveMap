@@ -1,28 +1,27 @@
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.UI;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using EGS.Tile;
 using EGS.Util;
-using PlasticPipe.PlasticProtocol.Messages;
+using System.Collections;
+using System;
 
 namespace EGS.Core
 {
-    /// <summary>
-    /// Gerencia a criação, posicionamento, cache e pré-carregamento de tiles dentro de um container.
-    /// </summary>
     [DisallowMultipleComponent]
     public class TileManager : MonoBehaviour
     {
         [Header("Cache & Performance")]
         [Tooltip("Quantos tiles além do Range devem ser mantidos carregados para evitar áreas brancas.")]
-        [SerializeField] private int bufferMargin = 1;
+        [SerializeField] private int bufferMargin = 2;
 
-        [Tooltip("Quantos níveis de zoom acima/abaixo devem ser pré-carregados.")]
-        [SerializeField] private int zoomBuffer = 2;
+        //[Tooltip("Quantos níveis de zoom acima/abaixo devem ser pré-carregados.")]
+        //[SerializeField] private int zoomBuffer = 2;
+
+        [Tooltip("Limite de texturas em cache (evita consumir memória demais)")]
+        [SerializeField] private int textureCacheLimit = 2500;
 
         private TileRenderer m_tilePrefab;
         private int m_tileSize;
@@ -30,38 +29,28 @@ namespace EGS.Core
         private MapManager m_mapManager;
         private ObjectPool<TileRenderer> m_tilePool;
 
-        // Tiles ativos na cena (key -> GameObject)
         private readonly Dictionary<string, TileRenderer> m_activeTiles = new Dictionary<string, TileRenderer>();
-        // Cache de texturas baixadas (key -> Texture2D)
         private readonly Dictionary<string, Texture2D> m_textureCache = new Dictionary<string, Texture2D>();
-        // Conjunto de chaves visíveis no frame anterior (para zoom atual)
+        private readonly Dictionary<string, Texture2D> m_pendingTextures = new();
+        private readonly Queue<string> m_cacheQueue = new Queue<string>(); // Para FIFO do cache
         private readonly HashSet<string> m_prevVisible = new HashSet<string>();
 
-        /// <summary>Zoom atual do mapa.</summary>
         public float Zoom { get; set; }
-        /// <summary>Latitude central usada para renderização.</summary>
         public double CenterLat { get; set; }
-        /// <summary>Longitude central usada para renderização.</summary>
         public double CenterLon { get; set; }
-        /// <summary>Raio de tiles ao redor do centro.</summary>
         public int Range { get; set; }
 
-        // Contador de downloads pendentes (visíveis e pré-carregados)
         private int m_pendingDownloads = 0;
-
-        /// <summary>
-        /// Indica se todos os downloads de tiles (visíveis e pré-carregados) foram concluídos.
-        /// </summary>
         public bool AllDownloadsComplete => m_pendingDownloads == 0;
+        private bool m_isZoomRendering = false;
 
-        /// <summary>
-        /// Inicializa o TileManager com prefab, tamanho, textura default e serviço de tiles.
-        /// </summary>
-        public void Initialize(MapManager mapManager,TileRenderer tilePrefab,int tileSize,Texture2D defaultTexture,TileDownloader tileDownloader)
+        public event Action OnZoomRenderingFinish;
+
+        public void Initialize(MapManager mapManager, TileRenderer tilePrefab, int tileSize, Texture2D defaultTexture)
         {
             m_tilePrefab = tilePrefab;
             m_tileSize = tileSize;
-            m_tileDownloader = tileDownloader;
+            m_tileDownloader = new TileDownloader();
             m_mapManager = mapManager;
 
             m_tilePool = new ObjectPool<TileRenderer>(
@@ -80,26 +69,130 @@ namespace EGS.Core
             );
         }
 
-        /// <summary>
-        /// Renderiza o mapa no zoom atual e pré-carrega tiles de zoom adjacentes.
-        /// </summary>
+        public void RenderBatchZoom()
+        {
+            StartCoroutine(RenderTilesAfterBatchDownload());
+        }
+
+        private IEnumerator RenderTilesAfterBatchDownload()
+        {
+            float startTime = Time.realtimeSinceStartup;
+            int currentZoom = Mathf.RoundToInt(Zoom);
+            int minZoom = Mathf.RoundToInt(m_mapManager.MapSettings.ZoomMin);
+            int maxZoom = Mathf.RoundToInt(m_mapManager.MapSettings.ZoomMax);
+
+            var visibleNow = GetVisibleKeySet(currentZoom);
+            var downloadsInProgress = new List<IEnumerator>();
+
+            m_pendingTextures.Clear();
+
+            // Fase 1: Inicia download para todos os tiles visíveis
+            foreach (var key in visibleNow)
+            {
+                var parts = key.Split('/');
+                int z = int.Parse(parts[0]);
+                int x = int.Parse(parts[1]);
+                int y = int.Parse(parts[2]);
+
+                if (!m_activeTiles.TryGetValue(key, out var tileGO))
+                {
+                    tileGO = m_tilePool.Get();
+                    tileGO.transform.SetParent(transform, false);
+                    m_activeTiles[key] = tileGO;
+                }
+
+                Vector2 centerPx = MapUtils.LatLonToPixels(CenterLat, CenterLon, z, m_mapManager.MapSettings.TilePixelSize);
+                double half = m_mapManager.MapSettings.TilePixelSize * 0.5;
+                double tilePxX = x * m_mapManager.MapSettings.TilePixelSize + half;
+                double tilePxY = y * m_mapManager.MapSettings.TilePixelSize + half;
+                double offsetX = tilePxX - centerPx.x;
+                double offsetY = -(tilePxY - centerPx.y);
+                double scale = (double)m_tileSize / m_mapManager.MapSettings.TilePixelSize;
+                tileGO.transform.localPosition = new Vector3((float)(offsetX * scale), (float)(offsetY * scale), 0f);
+
+                tileGO.gameObject.SetActive(false); // ainda não mostra
+
+                if (m_textureCache.TryGetValue(key, out var cached))
+                {
+                    m_pendingTextures[key] = cached;
+                }
+                else
+                {
+                    m_pendingDownloads++;
+                    StartCoroutine(m_tileDownloader.DownloadTile(
+                        m_mapManager.MapSettings.URL,
+                        x, y, z,
+                        tex =>
+                        {
+                            if (tex != null)
+                            {
+                                m_textureCache[key] = tex;
+                                m_cacheQueue.Enqueue(key);
+                                TrimCacheIfNeeded();
+                                m_pendingTextures[key] = tex;
+                            }
+                            m_pendingDownloads--;
+                        }
+                    ));
+                }
+            }
+
+            // Fase 2: Espera todos os downloads terminarem
+            while (m_pendingDownloads > 0)
+                yield return null;
+
+            float duration = Time.realtimeSinceStartup - startTime;
+
+            if (duration < 1.5f)
+                yield return new WaitForSeconds(1.5f - duration);
+
+            // Fase 3: Remove tiles que saíram da visão
+            foreach (var oldKey in m_prevVisible.Except(visibleNow).ToList())
+            {
+                if (m_activeTiles.TryGetValue(oldKey, out var oldGO))
+                {
+                    m_tilePool.Release(oldGO);
+                    m_activeTiles.Remove(oldKey);
+                }
+                m_prevVisible.Remove(oldKey);
+            }
+
+            // Fase 4: Aplica as texturas e ativa os tiles
+            foreach (var key in visibleNow)
+            {
+                if (m_activeTiles.TryGetValue(key, out var go) && m_pendingTextures.TryGetValue(key, out var tex))
+                {
+                    ApplyTexture(go, tex); // aqui o tile é ativado dentro do método
+                }
+                m_prevVisible.Add(key);
+            }
+            // espera o tempo mínimo para suavidade
+            OnZoomRenderingFinish?.Invoke();
+
+            //// Fase 5: Pré-carrega outros zooms (opcional, pode mover para o fim ou deixar fora se quiser suavidade total)
+            //for (int dz = -zoomBuffer; dz <= zoomBuffer; dz++)
+            //{
+            //    if (dz == 0) continue;
+            //    int z = currentZoom + dz;
+            //    if (z < minZoom || z > maxZoom) continue;
+            //    PrefetchZoom(z);
+            //}
+        }
         public void Render()
         {
             int currentZoom = Mathf.RoundToInt(Zoom);
             int minZoom = Mathf.RoundToInt(m_mapManager.MapSettings.ZoomMin);
             int maxZoom = Mathf.RoundToInt(m_mapManager.MapSettings.ZoomMax);
 
-            // 1) Renderiza tiles do zoom atual
             var visibleNow = GetVisibleKeySet(currentZoom);
+
             foreach (var key in visibleNow)
             {
-                // key = "{zoom}/{x}/{y}"
                 var parts = key.Split('/');
                 int z = int.Parse(parts[0]);
                 int x = int.Parse(parts[1]);
                 int y = int.Parse(parts[2]);
 
-                // Calcula posição local
                 Vector2 centerPx = MapUtils.LatLonToPixels(
                     CenterLat,
                     CenterLon,
@@ -112,6 +205,7 @@ namespace EGS.Core
                 double offsetX = tilePxX - centerPx.x;
                 double offsetY = -(tilePxY - centerPx.y);
                 double scale = (double)m_tileSize / m_mapManager.MapSettings.TilePixelSize;
+
                 Vector3 localPos = new Vector3(
                     (float)(offsetX * scale),
                     (float)(offsetY * scale),
@@ -124,7 +218,6 @@ namespace EGS.Core
                 }
                 else
                 {
-                    // Instancia novo tile
                     TileRenderer go = m_tilePool.Get();
                     go.transform.SetParent(transform, false);
                     go.transform.localPosition = localPos;
@@ -139,17 +232,26 @@ namespace EGS.Core
                     }
                     else
                     {
-                        // Download e cache
                         StartCoroutine(
                             m_tileDownloader.DownloadTile(
                                 m_mapManager.MapSettings.URL,
                                 x, y, z,
                                 tex =>
                                 {
-                                    if (tex != null)
+                                    if (tex == null)
+                                    {
+                                        Debug.LogWarning($"Tile download failed: {key}");
+                                    }
+                                    else
+                                    {
                                         m_textureCache[key] = tex;
-                                    if (m_activeTiles.ContainsKey(key))
-                                        ApplyTexture(go, tex);
+                                        m_cacheQueue.Enqueue(key);
+                                        TrimCacheIfNeeded();
+                                    }
+
+                                    if (m_activeTiles.TryGetValue(key, out var t))
+                                        ApplyTexture(t, tex);
+
                                     m_pendingDownloads--;
                                 }
                             )
@@ -158,7 +260,6 @@ namespace EGS.Core
                 }
             }
 
-            // 2) Remove tiles que saíram da visão no zoom atual
             foreach (var oldKey in m_prevVisible.Except(visibleNow).ToList())
             {
                 if (m_activeTiles.TryGetValue(oldKey, out var oldGO))
@@ -169,19 +270,15 @@ namespace EGS.Core
                 m_prevVisible.Remove(oldKey);
             }
 
-            // 3) Pré-carrega tiles para níveis de zoom adjacentes
-            for (int dz = -zoomBuffer; dz <= zoomBuffer; dz++)
-            {
-                if (dz == 0) continue;
-                int z = currentZoom + dz;
-                if (z < minZoom || z > maxZoom) continue;
-                PrefetchZoom(z);
-            }
+            //for (int dz = -zoomBuffer; dz <= zoomBuffer; dz++)
+            //{
+            //    if (dz == 0) continue;
+            //    int z = currentZoom + dz;
+            //    if (z < minZoom || z > maxZoom) continue;
+            //    PrefetchZoom(z);
+            //}
         }
 
-        /// <summary>
-        /// Gera o conjunto de chaves "zoom/x/y" visíveis no mapa para um dado nível de zoom.
-        /// </summary>
         private HashSet<string> GetVisibleKeySet(int zoom)
         {
             var keys = new HashSet<string>();
@@ -206,9 +303,6 @@ namespace EGS.Core
             return keys;
         }
 
-        /// <summary>
-        /// Inicia o download em background para preencher cache de um nível de zoom.
-        /// </summary>
         private void PrefetchZoom(int zoom)
         {
             Vector2 centerPx = MapUtils.LatLonToPixels(
@@ -237,8 +331,16 @@ namespace EGS.Core
                             x, y, zoom,
                             tex =>
                             {
-                                if (tex != null)
+                                if (tex == null)
+                                {
+                                    Debug.LogWarning($"Prefetch failed: {key}");
+                                }
+                                else
+                                {
                                     m_textureCache[key] = tex;
+                                    m_cacheQueue.Enqueue(key);
+                                    TrimCacheIfNeeded();
+                                }
                                 m_pendingDownloads--;
                             }
                         )
@@ -246,21 +348,23 @@ namespace EGS.Core
                 }
         }
 
-        /// <summary>
-        /// Aplica textura baixada no RawImage do TileRenderer.
-        /// </summary>
-        private void ApplyTexture(TileRenderer go, Texture2D tex)
+        private void TrimCacheIfNeeded()
         {
-            if (tex == null) return;
-
-            go.SetTile(tex);
-            go.gameObject.SetActive(true);
-
+            while (m_cacheQueue.Count > textureCacheLimit)
+            {
+                var oldKey = m_cacheQueue.Dequeue();
+                if (m_textureCache.ContainsKey(oldKey))
+                    m_textureCache.Remove(oldKey);
+            }
         }
 
-        /// <summary>
-        /// Libera todos os tiles ativos e limpa o histórico de visibilidade.
-        /// </summary>
+        private void ApplyTexture(TileRenderer go, Texture2D tex)
+        {
+            if (go == null || tex == null) return;
+            go.SetTile(tex);
+            go.gameObject.SetActive(true);
+        }
+
         public void ReleaseAll()
         {
             foreach (var go in m_activeTiles.Values)

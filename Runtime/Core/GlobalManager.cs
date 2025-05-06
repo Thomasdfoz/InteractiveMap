@@ -11,7 +11,6 @@ namespace EGS.Core
         [Header("References")]
         [SerializeField, Tooltip("Canvas que conter� o mapa")] private Canvas m_canvasMap;
         [SerializeField, Tooltip("Prefab do tile")] private TileRenderer m_tilePrefab;
-        [SerializeField, Tooltip("Componente de download de tiles")] private TileDownloader m_downloader;
         [SerializeField, Tooltip("Componente de InputController para zoom/pan")] private MapController m_mapController;
         [SerializeField, Tooltip("Texture padrao para preencher os tiles que n�o possuem textura do servidor")] private Texture2D m_defaultTexture;
 
@@ -26,32 +25,30 @@ namespace EGS.Core
         [SerializeField] private MapConfig m_mapGlobal;
         [SerializeField] private MapConfig[] m_maps;
 
-        
-
-
         private PinManager m_pinManager;
         private double m_centerLon;
         private double m_centerLat;
         private float m_zoom;
         private bool m_isFinish;
+        private bool m_isRender;
 
         /// <summary>
         /// ZoomMouse atual do mapa.
         /// </summary>
-        public float Zoom { get => m_zoom; set => m_zoom = value; }
+        public float Zoom { get => m_zoom; }
 
         /// <summary>
         /// Latitude central do mapa.
         /// </summary>
-        public double CenterLat { get => m_centerLat; set => m_centerLat = value; }
+        public double CenterLat { get => m_centerLat; }
 
         /// <summary>
         /// Longitude central do mapa.
         /// </summary>
-        public double CenterLon { get => m_centerLon; set => m_centerLon = value; }
+        public double CenterLon { get => m_centerLon; }
 
         public Transform MapGlobalContentTransform { get; private set; }
-        public RectTransform CenterReference => m_centerReference; 
+        public RectTransform CenterReference => m_centerReference;
         public MapConfig[] Maps => m_maps;
         public int TilePixelSize => m_mapGlobal.TilePixelSize;
         public int TileSize => m_tileSize;
@@ -82,7 +79,7 @@ namespace EGS.Core
             m_mapGlobal.MapManager = CreateMapContent(m_mapGlobal.name, m_canvasMap.transform, 1);
 
 
-            yield return m_mapGlobal.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, m_mapGlobal);
+            yield return m_mapGlobal.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_mapGlobal);
 
             if (!m_mapGlobal.MapManager.IsFinish) yield break;
 
@@ -94,10 +91,12 @@ namespace EGS.Core
             {
                 map.MapManager = CreateMapContent(map.name, MapGlobalContentTransform, 10);
                 AddPin(map.MapManager.gameObject, map.CenterLat, CenterLon);
-                yield return map.MapManager. Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, m_downloader, map);
+                yield return map.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, map);
             }
 
-            RenderMap();
+            m_mapGlobal.MapManager.RegisterEventOnZoomRenderingFinish(() => { m_isRender = false; m_mapGlobal.MapManager.gameObject.transform.localScale = Vector3.one; });
+
+            RenderMap(true);
 
             m_isFinish = true;
 
@@ -111,10 +110,47 @@ namespace EGS.Core
             m_pinManager.AddPin(pinPrefab, lat, lon, sortOrder);
         }
 
-        public void RenderMap()
+        public void UpdateCordinates(double lat, double lon)
         {
+            m_centerLat = lat;
+            m_centerLon = lon;
+        }
+
+        public void RenderMap(double lat, double lon, float zoom)
+        {
+            if (m_isRender) return;
+            StartCoroutine(ScaleObject(zoom > Zoom));
+            bool zoomChanged = (zoom != Zoom);
+            m_centerLat = lat;
+            m_centerLon = lon;
+            m_zoom = zoom;
+            RenderMap(zoomChanged);
+        }
+
+        public void RenderMap(float zoom)
+        {
+            if (m_isRender) return;
+            if (zoom != Zoom)
+            {
+                StartCoroutine(ScaleObject(zoom > Zoom));
+                m_zoom = zoom;
+                RenderMap(true);
+            }
+        }
+
+        public void RenderMap(double lat, double lon)
+        {
+            if (m_isRender) return;
+            m_centerLat = lat;
+            m_centerLon = lon;
+            RenderMap();
+        }
+        private void RenderMap(bool zoomChanged = false)
+        {
+            m_isRender = zoomChanged;
+
             // 1) renderiza global
-            m_mapGlobal.MapManager.RenderMap();
+            m_mapGlobal.MapManager.RenderMap(zoomChanged);
 
             // 3) percorre cada mapa náutico
             foreach (var map in m_maps)
@@ -132,7 +168,7 @@ namespace EGS.Core
 
                 // só renderiza se zoom E bounds OK
                 if (inZoom && inBounds)
-                    mgr.RenderMap();
+                    mgr.RenderMap(zoomChanged);
                 else
                     mgr.ReleaseMap();
             }
@@ -169,6 +205,31 @@ namespace EGS.Core
             rt.anchorMax = Vector2.one;
             rt.offsetMin = new Vector2(-500, -500);
             rt.offsetMax = new Vector2(500, 500);
+        }
+
+        IEnumerator ScaleObject(bool more)
+        {
+            Vector3 initialScale = transform.localScale;
+            float size = 2f;
+            float sizeMinus = 0.5f;
+            Vector3 targetScale = more ? new(size, size, size) : new(sizeMinus, sizeMinus, sizeMinus);
+            float elapsedTime = 0f;
+            float duration = 2f;
+
+            while (elapsedTime < duration)
+            {
+                m_mapGlobal.MapManager.gameObject.transform.localScale = Vector3.Lerp(initialScale, targetScale, elapsedTime / duration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+
+                if (!m_isRender)
+                {
+                    m_mapGlobal.MapManager.gameObject.transform.localScale = Vector3.one;
+                    yield break;
+                }
+            }
+
+            m_mapGlobal.MapManager.gameObject.transform.localScale = targetScale; // Garante que o valor final seja exato
         }
     }
 }

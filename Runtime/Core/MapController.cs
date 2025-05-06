@@ -47,6 +47,10 @@ namespace EGS.Core
             float newZoom = Mathf.Clamp(oldZoom + (value > 0f ? 1 : -1), zoomMin, zoomMax);
             if (newZoom == oldZoom) return;
 
+            m_globalManager.RenderMap(newZoom);
+
+            return;
+
             // 3) Converte mouse screen → ponto local no viewport do mapa
             Vector2 localMousePos;
             RectTransform mapViewport = m_mapContent.parent as RectTransform;
@@ -85,20 +89,16 @@ namespace EGS.Core
             );
 
             // 8) aplica novo centro e zoom, e re-renderiza
-            m_globalManager.CenterLat = clickLatLon.x;
-            m_globalManager.CenterLon = clickLatLon.y;
-            m_globalManager.Zoom = newZoom;
             UpdateCenterByVisualReference();
-            m_globalManager.RenderMap();
+            m_globalManager.RenderMap(clickLatLon.x, clickLatLon.y, newZoom);
         }
 
         public void Zoom(float value)
         {
             if (!Initialized) return;
 
-            m_globalManager.Zoom = value;
             UpdateCenterByVisualReference();
-            m_globalManager.RenderMap();
+            m_globalManager.RenderMap(m_globalManager.CenterLat, m_globalManager.CenterLon, value);
         }
 
         public void PanDown(Vector3 mousePos)
@@ -152,15 +152,11 @@ namespace EGS.Core
                   m_globalManager.TilePixelSize
                 );
 
-                // 4) Atualiza o centro lógico e reseta o pan visual
-                m_globalManager.CenterLat = newLatLon.x;
-                m_globalManager.CenterLon = newLatLon.y;
-
                 m_panOffset = Vector2.zero;
                 m_mapContent.anchoredPosition = Vector2.zero;
 
-                // 5) Re-renderiza incremental com o novo centro
-                m_globalManager.RenderMap();
+                // 4) Re-renderiza incremental com o novo centro
+                m_globalManager.RenderMap(newLatLon.x, newLatLon.y);
             }
         }
 
@@ -189,9 +185,7 @@ namespace EGS.Core
                 m_globalManager.Zoom,
                 m_globalManager.TilePixelSize);
 
-            m_globalManager.CenterLat = newLatLon.x;
-            m_globalManager.CenterLon = newLatLon.y;
-
+            m_globalManager.UpdateCordinates(newLatLon.x, newLatLon.y);
         }
 
         public void AddPin(Vector2 position, GameObject pinPrefab)
@@ -219,21 +213,16 @@ namespace EGS.Core
         {
             if (!Initialized) return;
 
-            m_globalManager.CenterLat = lat;
-            m_globalManager.CenterLon = lon;
             UpdateCenterByVisualReference();
-            m_globalManager.RenderMap();
+            m_globalManager.RenderMap(lat, lon);
         }
 
         public void FlyTo(double lat, double lon, float zoom)
         {
             if (!Initialized) return;
 
-            m_globalManager.CenterLat = lat;
-            m_globalManager.CenterLon = lon;
-            m_globalManager.Zoom = zoom;
             UpdateCenterByVisualReference();
-            m_globalManager.RenderMap();
+            m_globalManager.RenderMap(lat, lon, zoom);
         }
     }
 }
