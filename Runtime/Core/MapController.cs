@@ -1,5 +1,6 @@
 ﻿using EGS.Util;
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace EGS.Core
@@ -18,6 +19,8 @@ namespace EGS.Core
         private RectTransform m_mapContent;
         private Vector3 lastMousePosition;
         private Vector2 m_panOffset;
+        private int m_zoomMax = 18;
+        private int m_zoomMin = 6;
 
         public bool Initialized { get; private set; } = true;
 
@@ -223,6 +226,38 @@ namespace EGS.Core
 
             UpdateCenterByVisualReference();
             m_globalManager.RenderMap(lat, lon, zoom);
+        }
+
+        public void FlyTo(double minLat, double maxLat, double minLon, double maxLon)
+        {
+            if (!Initialized) return;
+
+            double centerLat = (minLat + maxLat) / 2f;
+            double centerLon = (minLon + maxLon) / 2f;
+
+            int tilePixelSize = m_globalManager.TilePixelSize;
+            int tileSize = m_globalManager.TileSize;
+            RectTransform canvasRect = m_globalManager.CenterReference;
+            float canvasWidth = canvasRect.rect.width;
+            float canvasHeight = canvasRect.rect.height;
+
+            for (int zoom = m_zoomMax; zoom >= m_zoomMin; zoom--)
+            {
+                Vector2 pxA = MapUtils.LatLonToPixels(minLat, minLon, zoom, tilePixelSize);
+                Vector2 pxB = MapUtils.LatLonToPixels(maxLat, maxLon, zoom, tilePixelSize);
+
+                float width = Mathf.Abs(pxB.x - pxA.x) * tileSize / tilePixelSize;
+                float height = Mathf.Abs(pxB.y - pxA.y) * tileSize / tilePixelSize;
+
+                if (width <= canvasWidth && height <= canvasHeight)
+                {
+                    FlyTo(centerLat, centerLon, zoom);
+                    return;
+                }
+            }
+
+            // Se nenhum zoom encaixou, usa o menor possível
+            FlyTo(centerLat, centerLon, m_zoomMin);
         }
     }
 }
