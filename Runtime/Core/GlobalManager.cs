@@ -94,7 +94,7 @@ namespace EGS.Core
                 yield return map.MapManager.Initialize(this, m_tilePrefab, m_tileSize, m_defaultTexture, map);
             }
 
-            m_mapGlobal.MapManager.RegisterEventOnZoomRenderingFinish(() => { m_isRender = false; m_mapGlobal.MapManager.gameObject.transform.localScale = Vector3.one; });
+            m_mapGlobal.MapManager.RegisterEventOnZoomRenderingFinish(() => { m_isRender = false; m_mapGlobal.MapManager.gameObject.transform.localScale = Vector3.one; m_pinManager.UpdateAllPins(); });
 
             RenderMap(true);
 
@@ -174,7 +174,8 @@ namespace EGS.Core
             }
 
             // 4) atualiza pins (caso eles dependam de todos os mapas)
-            m_pinManager.UpdateAllPins();
+            if (!zoomChanged)
+                m_pinManager.UpdateAllPins();
         }
 
         private MapManager CreateMapContent(string name, Transform parent, int sortOrder)
