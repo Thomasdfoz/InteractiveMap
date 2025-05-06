@@ -14,11 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: da-ilha-das-oncas-a-manaus
   URL: http://localhost:9090/data/da-ilha-das-oncas-a-manaus
-  Zoom: 13
   ZoomMin: 10
   ZoomMax: 16
   Range: 5
-  CenterLat: -3.19167
-  CenterLon: -59.78666
   TilePixelSize: 128
+  Zoom: 13
+  CenterLat: -3.1916747615586756
+  CenterLon: -59.786657350899105
+  MinLon: -60.053333299995785
+  MaxLon: -59.519981401802426
+  MinLat: -3.3800162183825133
+  MaxLat: -3.0033333047348374
+  BufferMargin: 0
+  ZoomBuffer: 0
   MapManager: {fileID: 0}

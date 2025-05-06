@@ -33,6 +33,12 @@ namespace EGS.Core
                 Initialized = true;
         }
 
+        IEnumerator Start()
+        {
+            yield return new WaitForSeconds(5);
+            FlyTo(-14, -13, -57.5, -55);
+        }
+
         public void ZoomMouse(float value)
         {
             if (!Initialized) return;

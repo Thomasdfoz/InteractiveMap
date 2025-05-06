@@ -17,7 +17,7 @@ public class Info : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         m_latitudeValue.text = m_globalManager.CenterLat.ToString("F6");
         m_longitudeValue.text = m_globalManager.CenterLon.ToString("F6");

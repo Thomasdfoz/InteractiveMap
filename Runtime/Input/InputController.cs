@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace EGS.Sample
+namespace EGS.MapInput
 {
     [DisallowMultipleComponent]
     public class InputController : MonoBehaviour, IMapInput
@@ -129,6 +129,14 @@ namespace EGS.Sample
             return false;
         }
 
+        public void FlyTo(double lat, double lon, float zoom)
+        {
+          mapController.FlyTo(lat, lon, zoom);
+        }
 
+        public void FlyTo(double minLat, double maxLat, double minLon, double maxLon)
+        {
+           mapController.FlyTo(minLat, maxLat, minLon, maxLon);
+        }
     }
 }

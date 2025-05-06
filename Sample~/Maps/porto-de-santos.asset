@@ -16,7 +16,7 @@ MonoBehaviour:
   URL: http://localhost:9090/data/porto-de-santos
   ZoomMin: 12
   ZoomMax: 18
-  Range: 3
+  Range: 5
   TilePixelSize: 128
   Zoom: 15
   CenterLat: -24.01666454701982
@@ -25,4 +25,6 @@ MonoBehaviour:
   MaxLon: -46.27833090627746
   MinLat: -24.08332909276421
   MaxLat: -23.950000001275427
+  BufferMargin: 0
+  ZoomBuffer: 0
   MapManager: {fileID: 0}

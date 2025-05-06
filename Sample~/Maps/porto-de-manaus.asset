@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: porto-de-manaus
   URL: http://localhost:9090/data/porto-de-manaus
-  Zoom: 14
   ZoomMin: 11
   ZoomMax: 17
   Range: 5
-  CenterLat: -59.995824813842795
-  CenterLon: -3.1250034254305574
-  Bounds:
-  - -60.053333299995785
-  - -3.3800162183825133
-  - -59.519981401802426
-  - -3.0033333047348374
   TilePixelSize: 128
+  Zoom: 14
+  CenterLat: -3.1250034254305574
+  CenterLon: -59.995824813842795
+  MinLon: -60.125000000000014
+  MaxLon: -59.866649627685575
+  MinLat: -3.216673517527775
+  MaxLat: -3.03333333333334
+  BufferMargin: 0
+  ZoomBuffer: 0
   MapManager: {fileID: 0}

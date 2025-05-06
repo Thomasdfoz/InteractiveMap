@@ -1,7 +1,6 @@
-using EGS.Core;
 using UnityEngine;
 using UnityEngine.UI;
-using EGS.Sample;
+using EGS.MapInput;
 
 namespace EGS.Sample
 {

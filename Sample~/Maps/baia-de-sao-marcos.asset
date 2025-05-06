@@ -25,4 +25,6 @@ MonoBehaviour:
   MaxLon: -44.200002573376466
   MinLat: -2.591670955302198
   MaxLat: -2.399999992431479
+  BufferMargin: 0
+  ZoomBuffer: 0
   MapManager: {fileID: 0}

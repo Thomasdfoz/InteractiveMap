@@ -1,4 +1,4 @@
-using EGS.Sample;
+using EGS.MapInput;
 using UnityEngine;
 
 namespace EGS.Sample
