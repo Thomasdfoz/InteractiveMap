@@ -9,19 +9,19 @@ namespace EGS.Data
         [Header("Map Settings")]
         public string Name;
         public string URL;
-        public float ZoomMin;
-        public float ZoomMax;
         public int Range;
         public int TilePixelSize;
+        [HideInInspector] public float ZoomMin;
+        [HideInInspector] public float ZoomMax;
         [Header("Map Center")]
-        public float Zoom;
-        public double CenterLat;
-        public double CenterLon;
+        [HideInInspector] public float Zoom;
+        [HideInInspector] public double CenterLat;
+        [HideInInspector] public double CenterLon;
         [Header("Map Bounds")]
-        public double MinLon;
-        public double MaxLon;
-        public double MinLat;
-        public double MaxLat;
+        [HideInInspector] public double MinLon;
+        [HideInInspector] public double MaxLon;
+        [HideInInspector] public double MinLat;
+        [HideInInspector] public double MaxLat;
         [Header("Cache & Performance")]
         [Tooltip("Quantos tiles além do Range devem ser mantidos carregados para evitar áreas brancas.")]
         [SerializeField] public int BufferMargin;

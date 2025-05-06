@@ -70,8 +70,7 @@ namespace EGS.Core
 
         private IEnumerator Start()
         {
-            m_centerLat = m_initialLat;
-            m_centerLon = m_initialLon;
+           UpdateCordinates(m_initialLat, m_initialLon);
             m_zoom = m_initialZoom;
 
             CreateBackground();
@@ -112,19 +111,23 @@ namespace EGS.Core
 
         public void UpdateCordinates(double lat, double lon)
         {
-            m_centerLat = lat;
-            m_centerLon = lon;
+            // Limites das Américas
+            double MIN_LAT = -60.0;
+            double MAX_LAT = 30.0;
+            double MIN_LON = -170.0;
+            double MAX_LON = -30.0;
+
+            m_centerLat = Mathf.Clamp((float)lat, (float)MIN_LAT, (float)MAX_LAT);
+            m_centerLon = Mathf.Clamp((float)lon, (float)MIN_LON, (float)MAX_LON);
         }
 
         public void RenderMap(double lat, double lon, float zoom)
         {
             if (m_isRender) return;
-            StartCoroutine(ScaleObject(zoom > Zoom));
             bool zoomChanged = (zoom != Zoom);
-            m_centerLat = lat;
-            m_centerLon = lon;
+            UpdateCordinates(lat, lon);
             m_zoom = zoom;
-            RenderMap(zoomChanged);
+            RenderMap(false);
         }
 
         public void RenderMap(float zoom)
@@ -141,8 +144,7 @@ namespace EGS.Core
         public void RenderMap(double lat, double lon)
         {
             if (m_isRender) return;
-            m_centerLat = lat;
-            m_centerLon = lon;
+            UpdateCordinates(lat, lon);
             RenderMap();
         }
         private void RenderMap(bool zoomChanged = false)
