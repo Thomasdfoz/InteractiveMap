@@ -1,14 +1,12 @@
 ﻿using EGS.Core;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
 
 namespace EGS.Sample
 {
     [DisallowMultipleComponent]
-    public class InputController : MonoBehaviour
+    public class InputController : MonoBehaviour, IMapInput
     {
         [SerializeField] private MapController mapController;
         [Header("→ Bloquear interações quando sobre essas layer")]
