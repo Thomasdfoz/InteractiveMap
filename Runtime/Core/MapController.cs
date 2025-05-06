@@ -101,7 +101,7 @@ namespace EGS.Core
             m_globalManager.RenderMap();
         }
 
-        public void PanDwon(Vector3 mousePos)
+        public void PanDown(Vector3 mousePos)
         {
             if (!Initialized) return;
 
