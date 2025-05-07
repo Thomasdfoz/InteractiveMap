@@ -1,4 +1,3 @@
-using EGS.Sample;
 using UnityEngine;
 
 namespace EGS.Sample
